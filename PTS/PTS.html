@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section class="slide level1">
+
+<!-- $theme: gaia -->
+</section>
+
+<section id="the-perl-toolchain-summit" class="slide level1">
+<h1>Attending the Perl Toolchain Summit</h1>
+<h2>Olaf Alders</h2>
+<h3 id="lyon-fr">Toronto Perl Mongers</h3>
+<h3 id="lyon-fr">May 31, 2018</h3>
+</section>
+
+<section id="the-perl-toolchain-summit" class="slide level1">
+<h1>The Perl Toolchain Summit</h1>
+<h2 id="may-11---14-2017">April 19 - 22, 2018</h2>
+<h3 id="lyon-fr">Oslo, Norway</h3>
+</section>
+
+<section id="the-rules-of-this-presentation" class="slide level1">
+<h1>The Rules of this Presentation</h1>
+</section>
+<section id="rule-3-feel-free-to-interrupt-me" class="slide level1">
+<h1>Rule #1: Feel free to interrupt me</h1>
+</section>
+<section id="thats-it" class="slide level1">
+<h1>Rule #2: That's it</h1>
+</section>
+<section id="some-background-on-ptsqah" class="slide level1">
+<h1>Some background on PTS/QAH</h1>
+</section>
+<section class="slide level1">
+
+<p>Event history (QA Hackathon):</p>
+<ul>
+<li>Oslo, 2008</li>
+<li>Birmingham, 2009</li>
+<li>Vienna, 2010</li>
+<li>Amsterdam, 2011</li>
+<li>Paris, 2012</li>
+<li>North West England, 2013</li>
+<li>Lyon, 2014</li>
+<li>Berlin, 2015</li>
+<li>Rugby, 2016</li>
+</ul>
+</section>
+
+<section class="slide level1">
+<p>Event history (Perl Toolchain Summit):</p>
+<ul>
+<li>Lyon, 2017</li>
+<li>Oslo, 2018</li>
+</ul>
+<!--
+The event (I think) started out as a way for Perl developers who were primarily working on Test and test-related modules to get everyone in the same room.  Over time that grew to include more people and a greater scope of modules.
+
+My first QAH was Paris in 2012 after Florian told me that I should go.  Since then I've also been to Lyon in 2014, Berlin in 2015 and Rugby in 2016.
+-->
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Formerly Perl QA Hackathon</li>
+<li>No longer really descriptive of the event</li>
+<li>Made fundraising difficult</li>
+</ul>
+<!--
+The hackathon isn't really about QA anymore.  It relies on sponsorship from many companies.  The meaning of the word "hackathon" has changed a bit over the last few years.  It has largely come to mean a pizza-fueled sleepless weekend where developers work for free in order to compete for some lame prize in the hopes that the sponsoring company can monetize their work.
+
+At the end of the day, when speaking with potential sponsors, this can lead to a lot of confusion.  The people making sponsorship decisions tend to be more on the business and less on the technical side, so you run the risk of getting refused outright or having to spend a lot of time explaining what the event actually is.
+-->
+</section>
+<section id="a-new-sponsor-of-note-was-added-this-year." class="slide level1">
+<h1>A new sponsor of note was added last year.</h1>
+</section>
+<section id="maxmind" class="slide level1">
+<h1>MaxMind!</h1>
+<!-- Traditionally, I don't think MaxMind has *ever* sponsored a Perl event, so I was very happy to see us get on board with it.  The truth is that we, as a company, derive a lot of benefit from the kind of work which gets done at PTS every year.  -->
+</section>
+<section id="section" class="slide level1">
+<h1><img src="group.jpg" /></h1>
+</section>
+
+<section id="section" class="slide level1">
+<h1><img src="group-2018.jpg" /></h1>
+</section>
+
+<section class="slide level1">
+
+<p>Some attendees:</p>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Andreas Koenig (ANDK)
+<ul>
+<li>Germany</li>
+<li>PAUSE</li>
+</ul></li>
+</ul>
+</section>
+
+
+<section class="slide level1">
+<ul>
+<li>Tatsuhiko Miyagawa (MIYAGAWA)
+<ul>
+<li>US</li>
+<li>Plack</li>
+<li>cpanm</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>Kenichi Ishigaki (ISHIGAKI)
+<ul>
+<li>Japan</li>
+<li>Parse::PMFile</li>
+<li>PAUSE</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>Mickey Nasriachi (MICKEY)
+<ul>
+<li>The Netherlands</li>
+<li>MetaCPAN::Client</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Sawyer (XSAWYERX)
+<ul>
+<li>The Netherlands</li>
+<li>Perl Pumpkin</li>
+<li>Ref::Util</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Joel Berger (JBERGER)
+<ul>
+<li>US</li>
+<li>Mojo</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>Philippe Bruhat (BOOK)
+<ul>
+<li>France</li>
+<li>Test::Requires</li>
+<li>Git::Repository</li>
+<li>App::Wallflower</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Karen Etheridge (ETHER)
+<ul>
+<li>Canada</li>
+<li>Moose</li>
+<li>misc modules</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Doug Bell (PREACTION)
+<ul>
+<li>US<br />
+</li>
+<li>CPANTS</li>
+<li>CPAN::Testers::API</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>H.Merijn Brand (HMBRAND)
+<ul>
+<li>Text::CSV_XS</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Graham Knop (HAARG)
+<ul>
+<li>The Netherlands<br />
+</li>
+<li>Moose/Moo</li>
+<li>local::lib</li>
+<li>travis-perl-helpers</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Breno G. de Oliveira (GARU)
+<ul>
+<li>Brazil</li>
+<li>Data::Printer</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Αριστοτέλης Παγκαλτζής (ARISTOTLE)
+<ul>
+<li>Germany<br />
+</li>
+<li>Plack::Middleware::Rewrite</li>
+<li>Hash::MultiValue</li>
+<li>Plack::Middleware::SignedCookies</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Leo Lapworth (LLAP)
+<ul>
+<li>UK</li>
+<li>perl.org</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Shoichi Kaji (SKAJI)
+<ul>
+<li>Japan</li>
+<li>App::cpm</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level1">
+
+<ul>
+<li>Paul Johnson (PJCJ)
+<ul>
+<li>Switzerland</li>
+<li>Devel::Cover</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>Babs Veloso
+<ul>
+<li>Brazil</li>
+<li>perl.org redesign</li>
+<li>MetaCPAN UI</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+<li>Tina Müller (TINITA)
+<ul>
+<li>Germany</li>
+<li>YAML::LibYAML</li>
+<li>Inline::C</li>
+</ul></li>
+</ul>
+</section>
+
+<section class="slide level1">
+
+<ul>
+  <li>David Golden (DAGOLDEN)
+<ul>
+<li>US</li>
+<li>HTTP::Tiny</li>
+<li>File::pushd</li>
+<li>Lots of *::Tiny modules</li>
+</ul></li>
+</ul>
+</section>
+
+<section id="lets-crunch-the-numbers" class="slide level1">
+<h1>Let's crunch the numbers</h1>
+</section>
+<section id="mm_website-depends-on-7391-perl-modules" class="slide level1">
+<h1>A sample of our code at MaxMind depends on 7,391 Perl modules</h1>
+</section>
+<section id="tps-attendees-had-maint-or-co-maint-on-11579-cpan-modules" class="slide level1">
+<h1>TPS attendees in 2017 had maint or co-maint on 11,579 CPAN modules</h1>
+</section>
+<section id="the-intersection-of-tps-module-perms-and-our-cpan-deps-is-1742" class="slide level1">
+<h1>The intersection of TPS module perms and our CPAN deps is 1,742</h1>
+</section>
+<section id="pts-had-the-power-to-fix-and-release-bugs-in-23.57-of-our-cpan-deps" class="slide level1">
+<h1>PTS had the power to fix and release bugs in 23.57% of our CPAN deps</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Authors</th>
+<th style="text-align: right;">Modules</th>
+<th style="text-align: right;">Covered</th>
+<th style="text-align: right;">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PTS</td>
+<td style="text-align: right;">11,579</td>
+<td style="text-align: right;">1,742</td>
+<td style="text-align: right;">23.57%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="maxmind-devs-vs-pts" class="slide level1">
+<h1>MaxMind Devs vs PTS</h1>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Authors</th>
+<th style="text-align: right;">Modules</th>
+<th style="text-align: right;">Covered</th>
+<th style="text-align: right;">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PTS</td>
+<td style="text-align: right;">11,579</td>
+<td style="text-align: right;">1,742</td>
+<td style="text-align: right;">23.57%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MM</td>
+<td style="text-align: right;">5,394</td>
+<td style="text-align: right;">1,025</td>
+<td style="text-align: right;">13.87%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level1">
+
+<p>The MM team contains one outlier. If we remove this developer from the mix, the numbers look quite different.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Authors</th>
+<th style="text-align: right;">Modules</th>
+<th style="text-align: right;">Covered</th>
+<th style="text-align: right;">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PTS</td>
+<td style="text-align: right;">11,579</td>
+<td style="text-align: right;">1,742</td>
+<td style="text-align: right;">23.57%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">MM-FLORA</td>
+<td style="text-align: right;">1,267</td>
+<td style="text-align: right;">294</td>
+<td style="text-align: right;">3.98%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide level1">
+
+<p>Now, how far does our coverage increase if we combine the power of PTS with the power of MaxMind?</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Authors</th>
+<th style="text-align: right;">Modules</th>
+<th style="text-align: right;">Covered</th>
+<th style="text-align: right;">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">MM+PTS</td>
+<td style="text-align: right;">13,883</td>
+<td style="text-align: right;">2,013</td>
+<td style="text-align: right;">27.24%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PTS</td>
+<td style="text-align: right;">11,579</td>
+<td style="text-align: right;">1,742</td>
+<td style="text-align: right;">23.57%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MM</td>
+<td style="text-align: right;">5,394</td>
+<td style="text-align: right;">1,025</td>
+<td style="text-align: right;">13.87%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="this-event-also-helps-me" class="slide level1">
+<h1>This event also helps me</h1>
+</section>
+
+<section id="this-event-provides" class="slide level1">
+<h1>This event provides</h1>
+<ul>
+<li>Dedicated, focussed, distraction-free work time</li>
+<li>You don't have to twist my arm to spend a few days in Europe</li>
+</ul>
+<!-- 
+
+My invitation is based on my involvement with MetaCPAN
+
+-->
+</section>
+<section class="slide level1">
+
+<h2 id="morning-standup">Morning Standup</h2>
+</section>
+<section id="section-2" class="slide level1">
+<h1><img src="standup.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<h2 id="the-metacpan-table">The MetaCPAN Table</h2>
+</section>
+<section id="section-3" class="slide level1">
+<h1><img src="mc-table.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<h2 id="whiteboarding">Whiteboarding</h2>
+</section>
+<section id="section-4" class="slide level1">
+<h1><img src="whiteboard.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<h2 id="you-can-never-leave">You can never leave</h2>
+<ul>
+<li>We all stay in the same hotel</li>
+<li>We (now) all have our own rooms</li>
+<li>When working from a hotel, breakfast and lunch are in the hotel</li>
+<li>We go out for group dinners some nights</li>
+<li>We usually have communal dinner in the hotel one night</li>
+<li>People hack in the hotel until the late hours, sometimes/often in the hotel bar</li>
+</ul>
+</section>
+<section id="section-5" class="slide level1">
+<h1><img src="food-1.jpg" /></h1>
+</section>
+<section id="section-6" class="slide level1">
+<h1><img src="food-2.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<h2 id="group-discussions">Group Discussions</h2>
+</section>
+<section id="section-7" class="slide level1">
+<h1><img src="group-discussion.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<h2 id="group-meal">Group Meal</h2>
+</section>
+<section id="section-8" class="slide level1">
+<h1><img src="group-meal.jpg" /></h1>
+</section>
+<section class="slide level1">
+
+<p>My focus in 2017:</p>
+<ul>
+<li>06perms</li>
+<li>Speeding up Travis CI build times</li>
+</ul>
+</section>
+<section id="perms" class="slide level1">
+<h1>06perms</h1>
+<ul>
+<li>Make the data available via API</li>
+<li>Make the data available via MetaCPAN front end</li>
+</ul>
+<!--
+Many people aren't aware of 06perms
+If you just look at the format of the file, it can be confusing.
+Also, it's not clear to an outsider what the directives in the file even more.
+People often think the last uploader of a module is the person they should contact for bug fixes.  In many instances this is a sub-optimal approach.  We want to expose all authors with module maint on a MetaCPAN page.  We also want to make it easy to audit module perms, troubleshoot permissions issues, etc)
+-->
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-06perms">What is 06perms?</h2>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-pause">What is PAUSE?</h2>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-cpan">What is CPAN?</h2>
+<ul>
+<li>A repository of Perl modules</li>
+<li>Modules are uploaded as archives (.tar.gz, .zip)</li>
+<li>Modules are indexed by PAUSE</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-a-module">What is a Module?</h2>
+<ul>
+<li>A Perl package</li>
+<li>Can be a file, but can also be an inner package</li>
+<li>It needs to have a <code>package</code> declaration, or it's not a module</li>
+<li>You can upload scripts, but they're kind of a side effect of modules</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-pause-1">What is PAUSE?</h2>
+<ul>
+<li><code>P</code>erl <code>A</code>uthors <code>U</code>pload <code>SE</code>rver</li>
+<li>Unpacks archives and assigns permissions to them</li>
+<li>Tracks data in a MySQL backend</li>
+<li>Produces text files which become part of CPAN</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h2 id="cpan-pause">CPAN + PAUSE</h2>
+<ul>
+<li>A repository which anyone can mirror
+<ul>
+<li>author info</li>
+<li>latest indexed modules (02packages)</li>
+<li>comprehensive list of author + module permissions (06perms)</li>
+</ul></li>
+<li>MetaCPAN and search.cpan.org depend heavily on these files</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-02packages">What is 02packages</h2>
+<ul>
+<li>module name</li>
+<li>version</li>
+<li>unique path to file (you cannot re-upload a file)</li>
+</ul>
+<p>Data::FormValidator 4.88 D/DF/DFARRELL/Data-FormValidator-4.88.tar.gz</p>
+</section>
+<section class="slide level1">
+
+<h2 id="what-is-06perms-1">What is 06perms?</h2>
+<p>It's found at <code>modules/06perms.txt</code> in CPAN mirrors.</p>
+<pre><code>Data::FormValidator,DFARRELL,c
+Data::FormValidator,MARKSTOS,c
+Data::FormValidator,OALDERS,c
+Data::FormValidator,TJMATHER,f
+Data::FormValidator::Any,MARKSTOS,c
+Data::FormValidator::Constraints,DFARRELL,c
+Data::FormValidator::Constraints,MARKSTOS,f
+Data::FormValidator::Constraints,OALDERS,c
+Data::FormValidator::Constraints,TJMATHER,c</code></pre>
+</section>
+<section id="perms-results" class="slide level1">
+<h1>06perms results</h1>
+<ul>
+<li>The work which had begun at the previous Lyon hackathon was finally merged</li>
+<li>A very basic UI was added to expose this data on the front end</li>
+<li>Babs Veloso and Neil Bowers proposed some UI improvements which can be tackled at some future time</li>
+<li>Use the <a href="https://metacpan.org/permission/distribution/Data-FormValidator" target="_blank">permissions</a> link on the left sidebar at MetaCPAN</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<p>Travis</p>
+<ul>
+<li>Our build times were extremely slow (up to 45 minutes)</li>
+<li>This problem is amplified at a hackathon</li>
+<li>Travis support was phenomenal</li>
+</ul>
+<!--
+Having multiple developers pushing at the same time can jam up the queue very quickly.  Initially we bought a Travis upgrade, but it didn't actually solve our particular problem.  So, I emailed Travis support and explained the issue.  Within a few minutes they had issued a refund for the purchase and bumped up our concurrent build numbers for the duration of the hackathon @ no charge.
+-->
+</section>
+<section id="however..." class="slide level1">
+<h1>However...</h1>
+<ul>
+<li>adding more concurrent builds will not make a slow build finish any faster</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<p>Bottlenecks:</p>
+<ul>
+<li>Module installs were running serially</li>
+<li>Modules always installed</li>
+<li>Tests running serially</li>
+<li>Devel::Cover builds were slowing down the reporting</li>
+<li>Failing at the last possible moment</li>
+</ul>
+</section>
+<section id="the-fixes" class="slide level1">
+<h1>The Fixes</h1>
+</section>
+<section class="slide level1">
+
+<h3 id="module-installs-were-running-serially">Module installs were running serially</h3>
+</section>
+<section class="slide level1">
+
+<h4 id="module-installs-were-running-serially-1">Module installs were running serially</h4>
+<ul>
+<li>Use App::cpm</li>
+</ul>
+<pre><code>before_install:
+  - cpanm -n App::cpm Carton
+install:
+  - cpm install -L $PERL_CARTON_PATH --resolver $CPAN_RESOLVER</code></pre>
+<!-- Fortunately the author of cpm was sitting at the next table, so I just walked over to him with my questions and he got me up and running right away -->
+</section>
+<section id="modules-always-installed" class="slide level1">
+<h1>Modules always installed</h1>
+</section>
+<section class="slide level1">
+
+<h4 id="modules-always-installed-1">Modules always installed</h4>
+<ul>
+<li>Use a Travis cache dir</li>
+</ul>
+<p>With carton:</p>
+<pre><code>cache:
+  directories:
+    - local</code></pre>
+<p><code>travis-perl</code> helpers (and others):</p>
+<pre><code>cache:
+  directories:
+    - ~/perl5</code></pre>
+</section>
+<section class="slide level1">
+
+<h4 id="travis-caching-caveats">Travis Caching Caveats</h4>
+<ul>
+<li>Travis caches are <em>not</em> network-local</li>
+<li>If you store archives larger than a few hundred megabytes in the cache, it's unlikely that you'll see a big speed improvement</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h3 id="tests-running-serially">Tests running serially</h3>
+</section>
+<section class="slide level1">
+
+<h5 id="tests-running-serially-1">Tests running serially</h5>
+<ul>
+<li>Run tests in parallel</li>
+<li><code>$(test-jobs)</code> is provided by <code>travis-perl</code></li>
+</ul>
+<pre><code>script:
+  - carton exec prove -lr -j$(test-jobs) t</code></pre>
+</section>
+<section class="slide level1">
+
+<h3 id="lets-apply-this-to-cpan-installs">Let's apply this to CPAN installs</h3>
+<p><code>cpm install --workers $(test-jobs)</code></p>
+<!-- cpm defaults to 5 workers.  This makes explicit how many workers we can expect are actually going to be useful -->
+</section>
+<section id="develcover-builds-were-slowing-down-the-reporting" class="slide level1">
+<h1>Devel::Cover builds were slowing down the reporting</h1>
+</section>
+<section id="use-a-build-matrix" class="slide level1">
+<h1>Use a Build Matrix</h1>
+<ul>
+<li>exclude coverage runs from success/failure reporting</li>
+</ul>
+<pre><code>env:
+  matrix:
+    - USE_CPANFILE_SNAPSHOT=false CPAN_RESOLVER=metadb PERL_CARTON_PATH=$TRAVIS_BUILD_DIR/no-snapshot HARNESS_VERBOSE=1
+    - USE_CPANFILE_SNAPSHOT=true
+    - USE_CPANFILE_SNAPSHOT=true COVERAGE=1
+matrix:
+  allow_failures:
+    - env: USE_CPANFILE_SNAPSHOT=true COVERAGE=1</code></pre>
+</section>
+<section id="force-develcover-to-exclude-directories" class="slide level1">
+<h1>Force Devel::Cover to exclude directories</h1>
+<pre><code>env:
+  global:
+    - DEVEL_COVER_OPTIONS=&quot;-ignore,^local/&quot;</code></pre>
+<!-- This syntax is a bit weird and not something I would have come up with on my own.  I got the answer on StackOverflow -->
+</section>
+<section id="failing-at-the-last-possible-moment" class="slide level1">
+<h1>Failing at the last possible moment</h1>
+</section>
+<section id="lets-fail-faster" class="slide level1">
+<h1>Let's fail faster!</h1>
+<pre><code>matrix:
+  fast_finish: true</code></pre>
+<p>This kicks in under either of the following conditions:</p>
+<ul>
+<li>only jobs in <code>allow_failures</code> are remaining</li>
+<li>one job has already failed</li>
+</ul>
+</section>
+<section class="slide level1">
+
+<h2 id="what-other-people-did">What happened this year:</h2>
+<ul>
+<li>Upgraded our vagrant developer boxes from Debian Wheezy to Debian Stretch</li>
+<li>Upgraded our Puppet configuration 2 major versions</li>
+<li>Worked on capacity in preparation for the retirement of search.cpan.org</li>
+</ul>
+</section>
+
+<section class="slide level1">
+  <ul>
+    <li>There are three tiers</li>
+    <li>Tier 1: Made up of core attendees</li>
+    <li>Tier 2: invited by tier 1</li>
+    <li>Tier 3: some combination of invited by the organizers and I'm honestly not sure</li>
+  </ul>
+</section>
+
+<section class="slide level1">
+  <p>How can you get into a tier?</p>
+  <ul>
+    <li>Tier 1: attend many years of PTS or lead a Perl infrastructure project</li>
+    <li>Tier 2: get invited by tier 1</li>
+    <li>Tier 3: there is some flex here</li>
+  </ul>
+</section>
+
+<section class="slide level1">
+  <ul>
+    <li>Get involved in projects or modules which are critical to Perl infrastructure</li>
+    <li>Working on core Perl stuff is not as crucial, since there's now a P5P hackathon.</li>
+  </ul>
+</section>
+
+<section class="slide level1">
+  <p>Sponsorships available for:</p>
+  <ul>
+    <li>Transportation</li>
+    <li>Most meals</li>
+    <li>Hotel</li>
+  </ul>
+</section>
+
+<section class="slide level1">
+  <p>Questions?</p>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
