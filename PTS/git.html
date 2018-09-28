@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section class="slide level1">
+
+<!-- $theme: gaia -->
+</section>
+
+<section id="the-perl-toolchain-summit" class="slide level1">
+<h1>Git Tips and Tricks</h1>
+<h2>Olaf Alders</h2>
+<h3 id="lyon-fr">Toronto Perl Mongers</h3>
+<h3 id="lyon-fr">Sep 27, 2018</h3>
+</section>
+
+<section class="slide level1">
+<p>Configuring Git</p>
+</section>
+
+<section class="slide level1">
+<pre>git config --global rerere.enabled 1</pre>
+</section>
+<section  class="slide level1">
+<pre>git config --global rerere.enabled 1</pre>
+<p>Reuse recorded resolution of conflicted merges</p>
+</section>
+
+<section class="slide level1">
+<pre>git config --global \
+alias.pf 'push --force-with-lease'</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global \
+alias.rgrep "grep --recurse-submodules"</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global \
+alias.view-stash 'stash show -p stash@{0}'</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global \
+grep.lineNumber true</pre>
+  <p>Handy if you use `fpp` (Facebook Path Picker)</p>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global help.autocorrect 10</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global help.autocorrect 10</pre>
+<pre>
+$ git doff
+WARNING: You called a Git command named 'doff', which does not exist.
+Continuing in 1.0 seconds, assuming that you meant 'diff'
+</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global \
+alias.revert-file-in-commit \
+'!f() { git show $2 -- $1 | git apply -R;}; f'</pre>
+</section>
+
+<section class="slide level1">
+  <pre>git config --global \
+alias.revert-file-in-commit \
+'!f() { git show $2 -- $1 | git apply -R;}; f'
+</pre>
+  <ul>
+  <li>
+    Revert the changes introduced by a single file in a single commit.
+  </li>
+    <li>Invoke as "git revert-file-in-commit path/to/file commit"</li>
+    <li>which translates to:
+<pre>git show dedca812826 -- path/to/file | git apply -R</pre>
+  </li>
+</ul>
+<p>
+</section>
+
+<section class="slide level1">
+  <h2>How is this generally useful?</h2>
+  <ul>
+    <li>Use <b>!</b> to run an external command via git alias</li>
+    <li>Use an anonymous function for complex logic</li>
+    <li>This can make it easier to deal with pipes</li>
+    <li>You can easily accept multiple arguments</li>
+</ul>
+<p>
+</section>
+
+<section class="slide level1">
+<p>Git Tips</p>
+</section>
+
+<section class="slide level1">
+  <p>(Almost) Never <b>git add .</b></h1>
+</section>
+
+<section class="slide level1">
+  <p>(Almost) Never <b>git add .</b></h1>
+  <p>Instead: <pre>git add -p</pre></p>
+</section>
+
+<section class="slide level1">
+<p>Reset in patch mode</p>
+  <pre>git reset -p</pre>
+</section>
+
+<section class="slide level1">
+  <p>Questions?</p>
+</section>
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+        incremental: true,
+        progress: true,
+        slideNumber: true,
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
