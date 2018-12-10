@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reveal.js/css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="reveal.js/css/theme/black.css" id="theme">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'reveal.js/css/print/pdf.css' : 'reveal.js/css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+  <!--[if lt IE 9]>
+  <script src="reveal.js/lib/js/html5shiv.js"></script>
+  <![endif]-->
+
+<style type="text/css">
+p { text-align: left; }
+</style>
+
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="splash" class="slide level1">
+<h1>How do I Open::This?</h1>
+<h2>Olaf Alders</h2>
+<h3 id="lyon-fr">December 18, 2018</h3>
+</section>
+
+<section id="the-rules-of-this-presentation" class="slide level1" data-transition="zoom-in fade-out">
+<h3>The problem:</h3>
+
+<p>Turning various forms of data into something your editor can open:</p>
+<ul>
+<li class="fragment" data-fragment-index="0">Stack traces</li>
+<li class="fragment" data-fragment-index="1">Perl module names</li>
+<li class="fragment" data-fragment-index="2">Perl module names suffixed with subroutine names</li>
+<li class="fragment" data-fragment-index="3">git-grep results</li>
+<li class="fragment" data-fragment-index="4">GitHub URLs</li>
+</ul>
+</section>
+
+<section id="the-rules-of-this-presentation" class="slide level1" data-transition="zoom-in fade-out">
+<h3>The solution:</h3>
+
+<p><code>ot</code>: a command line utility provided by Open::This</p>
+<p class="fragment fade-in-then-semi-out">I'll be using vim in examples, but <code>ot</code> supports vim, emacs and nano, depending on what you have set in <code>$ENV{EDITOR}</code>.
+</section>
+
+<section class="slide level1">
+<h3>Following Along</h3>
+<p>I'll be working out of a repository at https://github.com/oalders/git-helpers.  I've inserted a <code>die</code> into one of the modules.</p>
+</section>
+
+<section class="slide level1">
+<h3>Opening a File from a stack trace at the correct line</h3>
+<pre>Died at lib/Git/Helpers.pm line 50.</pre>
+<ul>
+<li class="fragment" data-fragment-index="0">
+<code>vim lib/Git/Helpers.pm</code>
+</li>
+<li class="fragment" data-fragment-index="1">
+<code>vim +48 lib/Git/Helpers.pm</code>
+</li>
+<li class="fragment" data-fragment-index="2">
+<code>ot lib/Git/Helpers.pm line 48</code>
+</li>
+</ul>
+</section>
+
+<section class="slide level1">
+<h3>Opening a File Using a Perl Module Name</h3>
+<p>Git::Helpers</p>
+<ul>
+<li class="fragment" data-fragment-index="0">
+<code>vim lib/Git/Helpers/CPAN.pm</code>
+</li>
+<li class="fragment" data-fragment-index="1">
+<code>ot Git::Helpers</code>
+</li>
+</ul>
+<br />
+<br />
+<p class="fragment fade-in-then-semi-out">
+By default, <code>ot</code> will search your <code>lib</code> and <code>t/lib</code> directories for local files. You can override this via the $ENV{OPEN_THIS_LIBS} variable. It accepts a comma-separated list of libs.
+</p>
+</section>
+
+<section class="slide level1">
+<h3>Opening a File Using a Perl Module and Subroutine Name</h3>
+<pre>Git::Helpers::is_inside_work_tree()</pre>
+<ul>
+<li class="fragment" data-fragment-index="1">
+<code style="font-size: 90%">ot "Git::Helpers::is_inside_work_tree()"</code>
+</ul>
+<br />
+<br />
+<i class="fragment fade-in-then-semi-out">*Note the quotes above</i>
+</section>
+
+<section class="slide level1">
+<h3>Opening an Installed Perl Module</h3>
+<pre>Test::More</pre>
+<ul>
+<li class="fragment" data-fragment-index="0">
+<code style="font-size: 45%">vim /Users/olaf/.plenv/versions/5.26.1/lib/perl5/site_perl/5.26.1/Test/More.pm</code>
+</li>
+<li class="fragment" data-fragment-index="1">
+<code>ot "Test::More"</code>
+</ul>
+<p class="fragment fade-in-then-semi-out">
+By default, <code>ot</code> will search your <code>@INC</code> directories for Perl files.
+</p>
+</section>
+
+<section class="slide level1">
+<h3>Opening an Installed File at the Correct Line</h3>
+<pre>Test::More::subtest()</pre>
+<ul>
+<li class="fragment" data-fragment-index="1">
+<code>ot "Test::More::subtest()"</code>
+</ul>
+</section>
+
+<section class="slide level1">
+<h3>Opening git-grep results at the Correct Line</h3>
+<div class="fragment" data-fragment-index="0">
+<pre><code>
+$ git grep 'sub _build_latest_release' .
+</pre></code>
+</div>
+<div class="fragment" data-fragment-index="1">
+<pre><code>
+lib/Git/Helpers/CPAN.pm:72:sub _build_latest_release {
+</code></pre>
+</div>
+<ul>
+<li class="fragment" data-fragment-index="2">
+<code>vim +72 lib/Git/Helpers/CPAN.pm</code>
+</li>
+<li class="fragment" data-fragment-index="3">
+<code>ot lib/Git/Helpers/CPAN.pm:72</code>
+</ul>
+</section>
+
+ <section class="slide level1">
+ <h3>Opening a file locally via a partial GitHub link:</h3>
+   <p class="fragment" data-fragment-index="0" style="font-size: 70%">
+     https://github.com/oalders/git-helpers/blob/master/lib/Git/Helpers.pm#L50
+   </p>
+ <ul>
+    <li class="fragment" data-fragment-index="1">
+      <code>vim +50 lib/Git/Helpers.pm</code>
+    </li>
+    <li class="fragment" data-fragment-index="2">
+      <code>ot lib/Git/Helpers.pm#L50</code>
+    </li>
+  </ul>
+ </section>
+
+<section class="slide level1">
+<h3>Opening a checked out file at GitHub</h3>
+<p>Any of the following will work:</p>
+<ul>
+  <li class="fragment" data-fragment-index="0">ot -b Git::Helpers</li>
+  <li class="fragment" data-fragment-index="1">ot -b "Git::Helpers::is_inside_work_tree()"</li>
+  <li class="fragment" data-fragment-index="2">ot -b Git::Helpers:75</li>
+  <li class="fragment" data-fragment-index="3">ot -b Git::Helpers line 75</li>
+</ul>
+</section>
+
+<section class="slide level1">
+  <p>Questions?</p>
+</section>
+
+    </div>
+  </div>
+
+  <script src="reveal.js/lib/js/head.min.js"></script>
+  <script src="reveal.js/js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+        incremental: true,
+        progress: true,
+        slideNumber: true,
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+          { src: 'reveal.js/plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>
