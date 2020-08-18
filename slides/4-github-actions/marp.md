@@ -786,6 +786,23 @@ See https://github.com/Perl/docker-perl-tester
 
 ---
 
+# Uploading `cpanfile.snapshot`
+
+```yaml
+- name: Maybe update cpanfile.snapshot
+  run: carton
+- name: Run Tests
+  run: carton exec prove -lr --jobs 2 t
+- uses: actions/upload-artifact@master
+  with:
+      name: "${{ matrix.perl-version }}"
+      path: cpanfile.snapshot
+```
+
+See https://github.com/metacpan/metacpan-web
+
+---
+
 # Manage Issue Labels in Repository (Define Labels)
 
 Create a YAML file at `path/to/manifest/labels.yml`
@@ -859,23 +876,6 @@ See https://github.com/micnncim/action-label-syncer
 Don't want to use an action?
 
 `curl -sL https://git.io/cpm | perl - install -g Moo`
-
----
-
-# Uploading `cpanfile.snapshot`
-
-```yaml
-- name: Maybe update cpanfile.snapshot
-  run: carton
-- name: Run Tests
-  run: carton exec prove -lr --jobs 2 t
-- uses: actions/upload-artifact@master
-  with:
-      name: "${{ matrix.perl-version }}"
-      path: cpanfile.snapshot
-```
-
-See https://github.com/metacpan/metacpan-web
 
 ---
 # `perl-actions/install-with-cpanm`
