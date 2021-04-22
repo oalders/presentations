@@ -46,6 +46,19 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 ```
 
+Now, `fzf` will be installed for you via `:PlugInstall`
+
+Source key bindings and bash completion:
+
+```
+[ -f "$HOME"/.vim/plugged/fzf/shell/key-bindings.bash ] && source "$HOME"/.vim/plugged/fzf/shell/key-bindings.bash
+[ -f "$HOME"/.vim/plugged/fzf/shell/completion.bash ] && source "$HOME"/.vim/plugged/fzf/shell/completion.bash
+```
+
+---
+
+# Can I do this without a vim session?
+
 Install via command line:
 
 ```
@@ -71,6 +84,14 @@ Add the above command to your dot-files in order to automate your `fzf` installa
 
 ---
 
+# More Advanced Matching
+
+* `.json$`
+* `^lab`
+* `^lab | ^bin`
+
+---
+
 # Handy Shortcuts
 
 ## Emulate `tig`
@@ -83,7 +104,8 @@ git log --oneline | fzf --multi --preview 'git show {+1}'
 # vim
 
 * `:Files ~`
-* `:GFiles`
+* `:GFiles` (`git ls-files`)
+* `:GFiles?` (`git status`)
 * `:Buffers`
 * `:Colors`
 * `:Lines`
@@ -92,11 +114,21 @@ git log --oneline | fzf --multi --preview 'git show {+1}'
 * `:Commits` (requires Fugitive.vim)
 * `:Commands`
 * `:Filetypes`
-
-Toggle preview window via `ctrl-/`
+* `:Rg`
 
 ---
 
-## vim Fullscreen
+# vim fullscreen
+* Add a trailing `!` to your command: `:GFiles!`
 
-Add a trailing `!` to your command: `:GFiles!`
+---
+# vim preview windows
+
+* Toggle preview window via `ctrl-/`
+
+---
+# Grep Repository (via ripgrep)
+
+`:Rg some text`
+
+---
