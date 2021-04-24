@@ -1,0 +1,10 @@
+1)  Dangling Docker                  # docker rmi -f $(docker images -f "dangling=true" -q)
+2)  dzil stale                       # dzil stale --all | xargs cpm install --global
+3)  Install Perl deps                # cpm install -g --cpanfile cpanfile
+4)  Merged branches                  # git branch --no-color --merged | grep -v "\*" | grep -v master
+5)  Update Homebrew                  # brew update -v && brew upgrade && brew cleanup; brew doctor
+6)  Update vim plugins               # vim +'PlugInstall --sync' +qa
+7)  vim + fzf + ripgrep (fullscreen) # vim +'Rg! Docker'
+8)  vim color schemes                # vim init.sh +':Colors!'
+9)  vim filetypes                    # vim init.sh +':Filetypes!'
+10) vim commands                     # vim +':Commands!'
