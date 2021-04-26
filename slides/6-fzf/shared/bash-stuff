@@ -1,6 +1,3 @@
-alias fd=fdfind
-alias bat=batcat
-
 commands() {
     SELECTION=$(cat shared/commands.txt | fzf --reverse)
     COMMAND=$(echo $SELECTION | cut -d'#' -f2-)
