@@ -5,7 +5,7 @@
 
 Today I want to talk about how imports are used in Perl. 
 
-My plan is to break this down into terms which even someone who is relatively new to Perl programming can understand. If you've already been writing Perl for a lot of years, please bear with me for the first few minutes. Sometimes a refresher on the basics can be a very good thing. Some of the details we'll be discussing are around things that many of us assume we understand really well, but that's not always the case.
+My plan is to break this down into terms which even someone who is relatively new to Perl programming can understand. If you've already been writing Perl for a lot of years, please bear with me for the first few minutes. Sometimes a refresher on the basics can be a helpful.
 
 ---
 
@@ -23,15 +23,21 @@ Where did `GET` come from? If you're familiar with `HTTP::Request::Common`, this
 
 # Exporter
 
-`HTTP::Request::Common` uses a module called `Exporter`. `Exporter`'s API says that if you define an array called `our @EXPORT` that the symbols in this array will be imported into a package when your module is used without arguments.
+`HTTP::Request::Common` uses a module called `Exporter`.  When your module is used without arguments, `Exporter` looks for an array called `@EXPORT` and imports everything listed in this array into the calling package.
 
-So, when you do this:
+Defined inside of `HTTP::Request::Common` is the following line: 
+
+```perl
+our @EXPORT =qw(GET HEAD PUT PATCH POST OPTIONS);
+```
+
+So, by definition, 
 
 ```perl
 use HTTP::Request::Common;
 ```
 
-you get the following functions available to your package:
+imports the following functions into to your package:
 
 ```
 +--------------------------+
@@ -44,13 +50,15 @@ you get the following functions available to your package:
 '--------------------------'
 ```
 
-That's convenient, but from an outsider's perspective it can be very confusing. Keep in mind that an outsider might just be someone who is not familiar with `HTTP::Request::Common`. How do we make this clearer?
+You can now use all of these functions without having to use a fully qualified name like `HTTP::Request::Common::GET()`. That's convenient, but from an outsider's perspective it can be very confusing. Keep in mind that an outsider might not be someone who isn't familiar with Perl. It could be someone who is not familiar with `HTTP::Request::Common`. 
+
+How do we make this clearer?
 
 ---
 
-# With Explicit Imports
+# Explicit Imports
 
-`Exporter`'s API defines another special array called `our @EXPORT_OK`. This array contains the names of symbols which can only be imported explicitly. So, if a symbol occurs either in a modules `@EXPORT` or in its `@EXPORT_OK` you can import it explicitly, without getting many of the symbols you did not ask for.
+When your module is used with arguments, `Exporter` looks for an array called `@EXPORT_OK`. Each import argument which matches as symbol in `@EXPORT_OK` will be imported into the calling package. `Exporter` will also check `@EXPORT` in this case and import symbols which are found to exist there as well. It will not import any symbols which you have not specifically asked for.
 
 For example, 
 
@@ -77,21 +85,222 @@ This imports `GET`, but it does not import `HEAD`, `OPTIONS`, etc. So, we don't 
 * `%some_hash`
 * `*some_typeglob`
 
+`Exporter` is quite flexible in what it can export. It's a core Perl module and judging by the number of CPAN modules which depend on it, it may be the most popular.
+
+As we saw above, `Exporter` allows implicit imports, which will, by default, be imported into your package just by virtue of `use Module;`. This is both convenient and potentially a code maintenance problem.
+
+# Where Did that Symbol Come From?
+
+We've just seen that via `Exporter` we can import much more than just functions into our packages. We can also import variables and even typeglobs. We can even say, "give me a bunch of stuff I'm not sure I know about" and `Exporter` happily obliges. 
+
+```perl
+use POSIX;  # 582 symbols in @EXPORT
+use Socket; # 170 symbols in @EXPORT
+```
+This can be a maintenance problem. For instance, you may come across some legacy code which includes a `use POSIX;`. We know from above that this imports 582 symbols into your package. Maybe you're not even using the symbols imported via the `POSIX` module. How can you know for sure?
+
+This brings us to two principles of software design and maintenance, Checkov's Gun and Chesterton's fence.
+
 ---
 
 # Checkhov's Gun 
+
+[Anton Chekhov](https://en.wikipedia.org/wiki/Anton_Chekhov) was a Russian playwright and short story writer. He is to have said:
 
 > "Remove everything that has no relevance to the story. If you say in the first chapter that there is a rifle hanging on the wall, in the second or third chapter it absolutely must go off. If it's not going to be fired, it shouldn't be hanging there"
 
 [https://en.wikipedia.org/wiki/Chekhov%27s_gun](https://en.wikipedia.org/wiki/Chekhov%27s_gun)
 
+This is an excellent principle to apply to software design. If you introduce some code, you must use it. If you're not going to use it, it must be removed. If you are disciplined about this principle, later maintainers will know that everything in your codebase is there for a specific reason. If they encounter something which appears to be unused, this should raise a red flag. Which brings us to Chesterton's Fence.
+
 ---
 
 # Chesterton's Fence
 
-> Do not remove a fence until you know why it was put up in the first place.
+This is inspired by G. K. Chesterton's 1929 book "The Thing". A succinct definition of this principle is:
 
-[https://fs.blog/2020/03/chestertons-fence/](https://fs.blog/2020/03/chestertons-fence/)
+> Do not remove a fence until you know why it was put up in the first place.
+> 
+
+To quote from [https://fs.blog/2020/03/chestertons-fence/](https://fs.blog/2020/03/chestertons-fence/):
+
+> ...fences don’t grow out of the ground, nor do people build them in their sleep or during a fit of madness. He explained that fences are built by people who carefully planned them out and “had some reason for thinking [the fence] would be a good thing for somebody.” Until we establish that reason, we have no business taking an ax to it. The reason might not be a good or relevant one; we just need to be aware of what the reason is. Otherwise, we may end up with unintended consequences: second- and third-order effects we don’t want, spreading like ripples on a pond and causing damage for years.
+
+This reads like a principle created explicitly for software design. In production systems, it's a good idea not to remove something until you know what it was there in the first place, so that you don't set in motion a chain of events which was entirely unintended.
+
+Module imports (and other code) are like this. Before we change or remove them, it's important to understand why they were there in the first place. This becomes much easier if previous work adhered to Checkhov's Gun, so that we can be more confident that the code in question did something meaningful rather than remaining as the result of sloppy work.
+
+---
+
+## Can We Automate This?
+
+Reasoning about code is important and we can get fairly far by grepping and digging around, but is there a faster way to do this? For instance, is it possible to write a utility which will inspect what a module is able to export, scan a body of code and remove unused imports?
+
+It's easy to remove some code, but not remove the imports which were being used. It would be nice not to have to think about this.
+
+---
+
+## goimports
+
+[https://pkg.go.dev/golang.org/x/tools/cmd/goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
+
+> Command goimports updates your Go import lines, adding missing ones and removing unreferenced ones.
+
+Using this utility via the `vim-go` plugin has given me a great appreciation for not having to fiddle with imports. Take the following example:
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "net/url"
+
+    "github.com/pariz/gountries"
+)
+
+func main() {
+    url, err := url.Parse("https://www.google.com/search?q=schitt%27s+creek")
+    if err != nil {
+        log.Fatal(err)
+    }
+    q := url.Query()
+    fmt.Println(q.Get("q")) // nolintforbidigo
+
+    countryObj, err := gountries.New().FindCountryByAlpha("CA")
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("CA is also: %s", countryObj.Codes.Alpha3) // nolintforbidigo
+}
+```
+
+This is a simple script which does some URL parsing and, unrelatedly, looks up a country by its ISO code, using a 3rd party library. `goimports` analyzes the code and organizes everything inside of the `import( )` section.
+
+You'll see that the libraries provided by the Go language are listed first, in alphabetical order. Then, after a blank line, third party libraries get listed.
+
+If I remove use of any of these libraries from the code and run `:GoImports` the unused libraries are removed from the import list. If I add a new standard library in the code `:GoImports` will add it to the `import` list for me, in the correct place. If I change the order of the imports, `:GoImports` will re-order them in the canonical way.
+
+This is a very basic example of what `goimports` can do, but it's incredibly powerful. It has taken a mundane task out of my hands. I don't need to think about the presentation of the code, or in many cases adding or removing libraries. `goimports` just does the right thing, when it knows how to do it.
+
+---
+
+## Can we write perlimports?
+
+Yes
+
+---
+
+## Will it be as good as goimports
+
+No
+
+---
+
+## The problem with imports in perl
+
+The biggest problem is that trying to find out what every CPAN module does or does not export is kind of unknowable. This is because 
+
+* not everything uses `Exporter`
+* Perl lets you get up to all sorts of shenanigans in an `import()`
+
+Having said that, we can actually get this to work in a lot of cases. It would be fun to see just how far we can get, so let's take a closer look at how we might go about this.
+
+---
+
+## Defeating Exporter
+
+This is actually not so bad. Since modules using `Exporter` define package level variables called `@EXPORT` and `@EXPORT_OK`, it's not hard to assess what they can or cannot export.
+
+It basically comes down to:
+
+```
+use POSIX;
+
+no strict 'refs';
+my @implicit = @{ $self->_module_name . '::EXPORT' };
+my @explicit = @{ $self->_module_name . '::EXPORT_OK' }, @implicit;
+```
+
+Now, it's entirely possible for a module which uses `Exporter` to do some unexpected things other than this, we're generally covered for this case.
+
+---
+
+## Defeating Sub::Exporter
+
+`Sub::Exporter` is a tougher nut to crack. As the name implies, it exports subs, not variables. So, we know we don't have to worry about variables. However, `Sub::Exporter` doesn't have any variables we can inspect without violating encapsulation. Also, it has a really flexible API. It would be hard for us to look at how `Sub::Exporter` is called and know exactly what is coming back out without poking at internals or reimplementing part of the module. However, there are a couple of things we can do.
+
+> If a module that uses Sub::Exporter is used with no arguments, it will try to export the group named default. If that group has not been specifically configured, it will be empty, and nothing will happen.
+>
+> Another group is also created if not defined: all. The all group contains all the exports from the exports list.
+
+[https://metacpan.org/pod/Sub::Exporter#Default-Groups](https://metacpan.org/pod/Sub::Exporter#Default-Groups)
+
+---
+
+## Sub::Exporter Implementation
+
+Basically, something like this will often (but not always) get us to the right place. To find everything that we could explicitly import:
+
+```perl
+package My::Random::Package::Name::All;
+
+use Module::That::Uses::Sub::Exporter qw( :all );
+```
+
+To find everything that a module exports by default (implicit imports):
+
+```perl
+package My::Random::Package::Name::Implicit;
+
+use Module::That::Uses::Sub::Exporter;
+```
+
+That will import subs into our new packages, but how to do we find out what was actually imported?
+
+---
+
+## Enter the symbol table
+
+---
+
+## Creating a new package
+
+```
+    my $to_eval = <<"EOF";
+package $pkg;
+
+use Symbol::Get;
+$use_statement
+our \@__EXPORTABLES;
+
+BEGIN {
+    \@__EXPORTABLES = Symbol::Get::get_names();
+}
+1;
+EOF
+```
+
+We use a `BEGIN` block so that we can get a list all of the names which have been added to the symbol table before modules like `namespace::autoclean` have a chance to remove them.
+
+After this we simply
+
+```perl
+eval $eval;
+
+no strict 'refs';
+my @found_imports = @{ $pkg . '::__EXPORTABLES' };
+```
+
+To ensure that we get a symbol table in a clean state, `$pkg` will be a package name which we have not used before.
+
+`$use_statement` will be either `use Module;` or `use Module qw( :all );` to cover both cases for `Sub::Exporter`.
+
+---
+
+## That covers a lot of cases
+
+Using the techniques outlined above for `Exporter` and `Sub::Exporter` we can cover a lot of cases. If neither of the above techniques have shown us any evidence of symbols being exported, we can perform some other heuristics to determine whether we actually have an object-oriented module on our hands. If that comes up empty, we can also decide that in this case, we currently just don't know and that's ok too.
 
 ---
 
