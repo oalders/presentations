@@ -58,7 +58,7 @@ How do we make this clearer?
 
 # Explicit Imports
 
-When your module is used with arguments, `Exporter` looks for an array called `@EXPORT_OK`. Each import argument which matches as symbol in `@EXPORT_OK` will be imported into the calling package. `Exporter` will also check `@EXPORT` in this case and import symbols which are found to exist there as well. It will not import any symbols which you have not specifically asked for.
+When your module is used with arguments, `Exporter` looks for an array called `@EXPORT_OK`. Each import argument which matches a symbol in `@EXPORT_OK` will be imported into the calling package. `Exporter` will also check `@EXPORT` in this case and import symbols which are found to exist there as well. It will not import any symbols which you have not specifically asked for.
 
 For example, 
 
@@ -124,9 +124,9 @@ This is inspired by G. K. Chesterton's 1929 book "The Thing". A succinct definit
 
 To quote from [https://fs.blog/2020/03/chestertons-fence/](https://fs.blog/2020/03/chestertons-fence/):
 
-> ...fences don’t grow out of the ground, nor do people build them in their sleep or during a fit of madness. He explained that fences are built by people who carefully planned them out and “had some reason for thinking [the fence] would be a good thing for somebody.” Until we establish that reason, we have no business taking an ax to it. The reason might not be a good or relevant one; we just need to be aware of what the reason is. Otherwise, we may end up with unintended consequences: second- and third-order effects we don’t want, spreading like ripples on a pond and causing damage for years.
+> ...fences don’t grow out of the ground, nor do people build them in their sleep or during a fit of madness.... fences are built by people who carefully planned them out and “had some reason for thinking [the fence] would be a good thing for somebody.” Until we establish that reason, we have no business taking an ax to it. The reason might not be a good or relevant one; we just need to be aware of what the reason is. Otherwise, we may end up with unintended consequences: second- and third-order effects we don’t want, spreading like ripples on a pond and causing damage for years.
 
-This reads like a principle created explicitly for software design. In production systems, it's a good idea not to remove something until you know what it was there in the first place, so that you don't set in motion a chain of events which was entirely unintended.
+This reads like a principle created explicitly for software design. In production systems, it's a good idea not to remove something until you know what it was there in the first place, so that you don't set in motion a chain of events that was unintended.
 
 Module imports (and other code) are like this. Before we change or remove them, it's important to understand why they were there in the first place. This becomes much easier if previous work adhered to Checkhov's Gun, so that we can be more confident that the code in question did something meaningful rather than remaining as the result of sloppy work.
 
@@ -204,103 +204,7 @@ The biggest problem is that trying to find out what every CPAN module does or do
 * not everything uses `Exporter`
 * Perl lets you get up to all sorts of shenanigans in an `import()`
 
-Having said that, we can actually get this to work in a lot of cases. It would be fun to see just how far we can get, so let's take a closer look at how we might go about this.
-
----
-
-## Defeating Exporter
-
-This is actually not so bad. Since modules using `Exporter` define package level variables called `@EXPORT` and `@EXPORT_OK`, it's not hard to assess what they can or cannot export.
-
-It basically comes down to:
-
-```
-use POSIX;
-
-no strict 'refs';
-my @implicit = @{ $self->_module_name . '::EXPORT' };
-my @explicit = @{ $self->_module_name . '::EXPORT_OK' }, @implicit;
-```
-
-Now, it's entirely possible for a module which uses `Exporter` to do some unexpected things other than this, we're generally covered for this case.
-
----
-
-## Defeating Sub::Exporter
-
-`Sub::Exporter` is a tougher nut to crack. As the name implies, it exports subs, not variables. So, we know we don't have to worry about variables. However, `Sub::Exporter` doesn't have any variables we can inspect without violating encapsulation. Also, it has a really flexible API. It would be hard for us to look at how `Sub::Exporter` is called and know exactly what is coming back out without poking at internals or reimplementing part of the module. However, there are a couple of things we can do.
-
-> If a module that uses Sub::Exporter is used with no arguments, it will try to export the group named default. If that group has not been specifically configured, it will be empty, and nothing will happen.
->
-> Another group is also created if not defined: all. The all group contains all the exports from the exports list.
-
-[https://metacpan.org/pod/Sub::Exporter#Default-Groups](https://metacpan.org/pod/Sub::Exporter#Default-Groups)
-
----
-
-## Sub::Exporter Implementation
-
-Basically, something like this will often (but not always) get us to the right place. To find everything that we could explicitly import:
-
-```perl
-package My::Random::Package::Name::All;
-
-use Module::That::Uses::Sub::Exporter qw( :all );
-```
-
-To find everything that a module exports by default (implicit imports):
-
-```perl
-package My::Random::Package::Name::Implicit;
-
-use Module::That::Uses::Sub::Exporter;
-```
-
-That will import subs into our new packages, but how to do we find out what was actually imported?
-
----
-
-## Enter the symbol table
-
----
-
-## Creating a new package
-
-```
-    my $to_eval = <<"EOF";
-package $pkg;
-
-use Symbol::Get;
-$use_statement
-our \@__EXPORTABLES;
-
-BEGIN {
-    \@__EXPORTABLES = Symbol::Get::get_names();
-}
-1;
-EOF
-```
-
-We use a `BEGIN` block so that we can get a list all of the names which have been added to the symbol table before modules like `namespace::autoclean` have a chance to remove them.
-
-After this we simply
-
-```perl
-eval $eval;
-
-no strict 'refs';
-my @found_imports = @{ $pkg . '::__EXPORTABLES' };
-```
-
-To ensure that we get a symbol table in a clean state, `$pkg` will be a package name which we have not used before.
-
-`$use_statement` will be either `use Module;` or `use Module qw( :all );` to cover both cases for `Sub::Exporter`.
-
----
-
-## That covers a lot of cases
-
-Using the techniques outlined above for `Exporter` and `Sub::Exporter` we can cover a lot of cases. If neither of the above techniques have shown us any evidence of symbols being exported, we can perform some other heuristics to determine whether we actually have an object-oriented module on our hands. If that comes up empty, we can also decide that in this case, we currently just don't know and that's ok too.
+Having said that, we can actually get this to work in a lot of cases. It would be fun to see just how far we can get, so let's take a closer look at how we might go about this. But before we do that, let's define what we really mean when we say "import".
 
 ---
 
@@ -325,17 +229,21 @@ use warnings;
 
 While you may not consciously think of it, you're actually using a module called `strict.pm` and a module called `warnings.pm` here. Both of these modules are provided to you for free, when you install `perl`. We call these modules which are included with Perl "core" modules.
 
-Now that we know about `strict` and `warnings`, we might learn about importing CPAN modules.
+Now that we know about `strict` and `warnings`, we might learn about importing CPAN modules. That might be as simple as 
 
-```
-use String::Trim;
-use Trim;
-use Text::Trim;
-use String::Trim::More;
-use Mojo::Util qw( trim );
+```perl
+use Socket;
+use POSIX qw( ceil );
 ```
 
-Wow, there really are a lot of ways to trim. Wouldn't it be great if this existed in core Perl? That wouldn't be a controversial change, would it? Oh, right. https://github.com/Perl/perl5/issues/17952
+or with a minimum version requirement:
+
+```perl
+use POSIX 1.88 qw( ceil );
+```
+
+The fact that you make version requirement with a `use` statement is helpful to know, but it's outside of the scope for today, so we probably won't mention it beyond this point.
+
 
 ---
 
@@ -581,6 +489,17 @@ Hang on. What just happened here? It turns out that passing an empty list to `us
 
 To summarize, there are now two cases in which the `import` subroutine is not called. The first is when it does not exist and the second is when an empty list is passed as an argument to `use` as in `use POSIX ();`
 
+We can demonstrate this via:
+
+```perl
+use strict ();
+
+$some_variable = 10;
+print $some_variable, "\n";
+```
+
+Prints "10", even though we haven't declared `$some_variable`, because `strict->import()` was never called.
+
 ---
 
 ## What Does `import()` Actually Do?
@@ -589,10 +508,10 @@ To summarize, there are now two cases in which the `import` subroutine is not ca
 This is surprisingly hard to answer. There are some conventions around how might happen when a module's `import` gets called. In the general case for modules which export functions, saying
 
 ```perl
-use Mojo::Util qw( trim );
+use Carp qw( croak );
 ```
 
-means that you now have a `trim` function available in the package where you issued the `use` statement. (If you haven't explicitly declared a package, you're in package `main`).
+means that you now have a `croak` function available in the package where you issued the `use` statement. (If you haven't explicitly declared a package, you're in package `main`).
 
 However, there is no binding contract to say that this must be the case.
 
@@ -606,14 +525,14 @@ This is what we can say with certainty.
 use Module;
 ```
 
-* Calls `import()` if it exists
+* Calls `Module->import()` if it exists
 * What happens in `import()` is up to the implementor
 
 ```perl
 use Module qw( some_function );
 ```
 
-* Calls `import( some_function)` if `import` exists.
+* Calls `Module->import( some_function)` if `import` exists.
 * If `import` does not exist, nothing happens. There is no warning that your arguments are being silently ignored.
 * What can be passed as values to `import()` is left up to the implementor. For instance, it's not unusual to pass a hash reference, etc.
   * `use DDP max_depth => 2, deparse => 1;`
@@ -642,6 +561,161 @@ use Module qw( :SOME_TAG );
 use Module qw( some_function );
 require Module;
 ```
+
+For readability of code, not a great idea, but you can do this.
+
+---
+
+## Writing perlimports
+
+That's enough background. Let's talk about implementing `perlimports`. We'll start with detecting what happens with `Exporter`, since it covers a lot of cases and it's probably the easiest task.
+
+---
+
+## Defeating Exporter
+
+This is actually not so bad. As we've already seen, modules using `Exporter` define package level variables called `@EXPORT` and `@EXPORT_OK`, it's not hard to assess what they can or cannot export.
+
+It basically comes down to:
+
+```
+use POSIX;
+
+no strict 'refs';
+my @implicit = @{ $self->_module_name . '::EXPORT' };
+my @explicit = @{ $self->_module_name . '::EXPORT_OK' }, @implicit;
+```
+
+It's entirely possible for a module which uses `Exporter` to do export in other ways as well, but we're generally covered for this case.
+
+---
+
+## Defeating Sub::Exporter
+
+`Sub::Exporter` is a tougher nut to crack. As the name implies, it exports subs, not variables. So, we know we don't have to worry about variables. However, `Sub::Exporter` doesn't have any variables we can inspect without violating encapsulation. Also, it has a really flexible API. It would be hard for us to look at how `Sub::Exporter` is called and know exactly what is coming back out without poking at internals or reimplementing part of the module. However, there are a couple of things we can do.
+
+> If a module that uses Sub::Exporter is used with no arguments, it will try to export the group named default. If that group has not been specifically configured, it will be empty, and nothing will happen.
+>
+> Another group is also created if not defined: all. The all group contains all the exports from the exports list.
+
+[https://metacpan.org/pod/Sub::Exporter#Default-Groups](https://metacpan.org/pod/Sub::Exporter#Default-Groups)
+
+---
+
+## Sub::Exporter Implementation
+
+Basically, something like this will often (but not always) get us to the right place. To find everything that we could explicitly import:
+
+```perl
+package My::Random::Package::Name::All;
+
+use Module::That::Uses::Sub::Exporter qw( :all );
+```
+
+To find everything that a module exports by default (implicit imports):
+
+```perl
+package My::Random::Package::Name::Implicit;
+
+use Module::That::Uses::Sub::Exporter;
+```
+
+That will import subs into our new packages, but how to do we find out what was actually imported? We can inspect the symbol table.
+
+---
+
+## Enter the symbol table
+
+What exactly is a symbol table? 
+
+> The symbol table for a package happens to be stored in the hash of that name with two colons appended. The main symbol table's name is thus %main::, or %:: for short.
+
+[https://perldoc.perl.org/perlmod#Symbol-Tables](https://perldoc.perl.org/perlmod#Symbol-Tables) 
+
+So, if you haven't declared a package name, you can find your symbol table at `%main::` or even just `%::`. If you're in `package MyModule;`, you can find your symbol table in `%MyModule::`.
+
+Try this one-liner to get an idea what's in `%main::` by default:
+
+`perl -e "require Data::Dumper;print Data::Dumper::Dumper( { %main:: } );"`
+
+---
+
+## Importing functions
+
+It turns out that when you import subroutines and other symbols from other modules, they appear in your package's symbol table. That's essentially the magic behind imports. 
+
+To import `Data::Dumper`'s `Dumper()` sub into your script without using a module:
+
+```perl
+*{'main::Dumper'} = \&{'Data::Dumper::Dumper'};
+```
+
+What we're doing here is essentially creating an alias to `Data::Dumper::Dumper()` in package `main`.
+
+---
+
+## Importing Variables
+
+We use the same trick with variables.
+
+```perl
+our $dumper_version;
+*{'main::dumper_version'} = \${'Data::Dumper::VERSION'};
+
+print $dumper_version;
+```
+
+This prints `2.181`. We have to be careful here, though. We've created an alias to a variable which is not read-only, since `our $VERSION` is, by default, not a constant.
+
+```perl
+++$dumper_version;
+print $Data::Dumper::VERSION;
+```
+
+This prints `3.181`.
+
+So, if you're going to export variables, you're better off exporting constants. See `Exporter::Constants`, 
+
+---
+
+## Creating a new package
+
+```
+    my $to_eval = <<"EOF";
+package $pkg;
+
+use Symbol::Get;
+$use_statement
+our \@__EXPORTABLES;
+
+BEGIN {
+    \@__EXPORTABLES = Symbol::Get::get_names();
+}
+1;
+EOF
+```
+
+We use a `BEGIN` block so that we can get a list all of the names which have been added to the symbol table before modules like `namespace::autoclean` have a chance to remove them.
+
+After this we simply
+
+```perl
+eval $eval;
+
+no strict 'refs';
+my @found_imports = @{ $pkg . '::__EXPORTABLES' };
+```
+
+To ensure that we get a symbol table in a clean state, `$pkg` will be a package name which we have not used before.
+
+`$use_statement` will be either `use Module;` or `use Module qw( :all );` to cover both cases for `Sub::Exporter`.
+
+---
+
+## That covers a lot of cases
+
+Using the techniques outlined above for `Exporter` and `Sub::Exporter` we can cover a lot of cases. If neither of the above techniques have shown us any evidence of symbols being exported, we can perform some other heuristics to determine whether we actually have an object-oriented module on our hands. If that comes up empty, we can also decide that in this case, we currently just don't know and that's ok too.
+
 
 ---
 
@@ -685,6 +759,9 @@ Unless you need to enable other pragmas in a specific order, add them after `str
 ```perl
 use strict;
 use warnings;
+
+our $VERSION = '1.0.0';
+
 use feature qw( signatures );
 use namespace::autoclean;
 no warnings qw( experimental::signatures );
@@ -712,6 +789,9 @@ use POSIX ();
 ```perl
 use strict;
 use warnings;
+
+our $VERSION = '1.0.0';
+
 use feature qw( signatures );
 no warnings qw( experimental::signatures );
 
