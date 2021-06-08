@@ -1103,174 +1103,12 @@
       
       ---
 
-      ## Best Practices
-      
-      ### use strict and warnings
-      
-      The first import statements in your package should be:
-      
-      ```perl
-      use strict;
-      use warnings;
-      ```
-      
-      or some equivalent module or pragma which also enables these.
-      
-      ```perl
-      use Moose; # or use Moo;
-      ```
-      
-      or 
-      
-      ```perl
-      use myownpragma;
-      ```
-         
-      ???
-
-      Import declarations are where we document which symbols are available to the enclosed code. In order to best help others (and future versions of ourselves) best understand what this code actually needs, we can follow a few simple rules.
-
-      ---
-      
-      ### other pragmas
-      
-      Unless you need to enable other pragmas in a specific order, add them after `strict` and `warnings`.
-      
-      ```perl
-      use strict;
-      use warnings;
-      
-      our $VERSION = '1.0.0';
-      
-      use feature qw( signatures );
-      use namespace::autoclean;
-      no warnings qw( experimental::signatures );
-      ```
-      
-      ???
-
-      If this is a CPAN module, you may want to add the `$VERSION string after warnings and before the other 
-      pragmas.
-
-      ---
-      
-      ### Everything Else
-      
-      Leave a space after the pragmata and then include the other modules you need, alpha-sorted unless, for some reason, order matters.
-      
-      ```perl
-      use strict;
-      use warnings;
-
-      use feature qw( signatures );
-      no warnings qw( experimental::signatures );
-      
-      use Carp qw( croak );
-      use Mojo::Util qw( trim );
-      use POSIX ();
-      ```
-      
-      ## Avoid Long Lines
-
-      `use` statements which would stretch beyond 78 characters, should try to pass arguments one per line, alpha-sorted, for readability.
-      
-      ```perl
-      use strict;
-      use warnings;
-      
-      our $VERSION = '1.0.0';
-      
-      use feature qw( signatures );
-      no warnings qw( experimental::signatures );
-      
-      use Carp qw( croak );
-      use HTTP::Status qw(
-          is_cacheable_by_default
-          is_client_error
-          is_error
-          is_info
-          is_redirect
-          is_server_error
-          is_success
-          status_message
-      );
-      use Mojo::Util qw( trim );
-      use POSIX ();
-      ```
-      
-      ---
-      
-      ## Sort Your use Statements
-      
-      ???
-
-      If everything is alpha-sorted, it makes it easier to see what has been used multiple times. You might be surprised how often this happens when use statements are not sorted. Keep in mind that they may not always be introduced intentionally. If you are rebasing in `git` and sorting out a merge conflict among import statements, it can be easy to introduce a second use of the same module accidentally.
-      
-      ---
-      
-      ## Stick With One Style of Parens
-      
-      ```perl
-      use EEE qw/ two /;
-      use EEE qw< three >;
-      use EEE qw' four ';
-      use EEE qw{ five };
-      use EEE qw| six |;
-      use EEE ( 'seven' );
-      use EEE 'eight';
-      use EEE qw+ nine +;
-      use EEE qw* ten *;
-      use EEE qw: eleven :;
-      use EEE qw$ twelve $;
-      ```
-      
-      ???
-
-      Perl will not stop you from being creating with your use of parentheses, but if you start mixing these up, they can be very hard to read. A more uniform look will be easier for most people to understand quickly.
-      
-      ---
-      
-      ## Stick With One Style of Padding
-      
-      A consistent use of padding with arguments also makes for a more uniform, readable list. Either a single space
-      
-      ```perl
-      use AAA qw( one );
-      use BBB qw( two );
-      ```
-      
-      or no padding at all
-      
-      ```perl
-      use AAA qw(one);
-      use BBB qw(two);
-      ```
-      
-      If you mix them up, it gets harder to read.
-      
-      ```perl
-      use AAA qw(one);
-      use BBB qw( two );
-      use CCC qw( three);
-      use DDD qw(four );
-      ```
-      
-      ---
+      ## Some Best Practices
       
       ## Avoid Export Tags
       
-      Using import tags, our previous example might have looked like
-      
       ```perl
-      use strict;
-      use warnings;
-      use feature qw( signatures );
-      no warnings qw( experimental::signatures );
-      
-      use Carp qw( croak );
-      use HTTP::Status qw( :is status_message );
-      use Mojo::Util qw( trim );
-      use POSIX ();
+      use HTTP::Status qw( :is );
       ```
       
       ???
@@ -1315,20 +1153,106 @@
       ### Demo: `perl script/verbose-exporter.pl`
       
       ---
+
+      ## Use Empty Parens as Documentation
       
-      ## Use Modules Once
+      ```
+      use LWP::UserAgent ();
+      ```
       
-      Unless you have a compelling reason, don't do this:
+      `LWP::UserAgent` has no `import()`, so there's not really a functional difference between these two uses:
       
       ```perl
+      use LWP::UserAgent;
+      use LWP::UserAgent ();
+      ```
+      
+      However, the bare parens act as documentation saying "this module imports nothing". 
+      
+      ???
+
+      If you're intimately familiar with all of the modules in your codebase, this distinction may not be meaningful to you, but it can be meaningful to others who also need to work on it. If I see a list of imports that is disciplined in its use of parens, then the modules with the implicit imports immediately become more obvious.
+
+      ---
+
+      ## Use Implicit Imports Prudently
+      
+      ```perl
+      use Moose;
+      
       use Carp qw( croak );
-      use Carp qw( confess );
+      use Data::Printer; # exports p() and np() by default
+      use LWP::UserAgent ();
+      use POSIX qw( ceil );
+      ```
+      
+      The magic of `Moose` happens when you import its symbols into your package. This is one case where implicit imports are a reasonable convention.
+      
+      ---
+
+      ## What Moose Exports
+
+      ```
+      .--------------------------.
+      | Default Exported Symbols |
+      +--------------------------+
+      | after                    |
+      | around                   |
+      | augment                  |
+      | before                   |
+      | blessed                  |
+      | confess                  |
+      | extends                  |
+      | has                      |
+      | inner                    |
+      | isa                      |
+      | meta                     |
+      | override                 |
+      | super                    |
+      | with                     |
+      '--------------------------'
+      ```
+      
+      ---
+      
+      ## Sort Your use Statements
+
+      ```perl
+      use AAA ();
+      use BBB ();
+      use CCC ();
       ```
       
       ???
 
-      Inevitably what will happen is that your code will, at some future date, stop using `Carp` entirely, but one of the statements will remain because it got missed. This can happen quite easily if you have a long list of unsorted imports. At that point, someone will be left wondering why it is there (see: Checkov's Gun) and whether they can remove it (see: Chesterton's Fence).
+      If everything is alpha-sorted, it makes it easier to see what has been used multiple times. You might be surprised how often this happens when use statements are not sorted. Keep in mind that they may not always be introduced intentionally. If you are rebasing in `git` and sorting out a merge conflict among import statements, it can be easy to introduce a second use of the same module accidentally.
       
+      ---
+      
+      ## Stick With One Style of Parens
+      
+      ```perl
+      use EEE qw/ two /;
+      use EEE qw< three >;
+      use EEE qw' four ';
+      use EEE qw{ five };
+      use EEE qw| six |;
+      use EEE ( 'seven' );
+      use EEE 'eight';
+      use EEE qw+ nine +;
+      use EEE qw* ten *;
+      use EEE qw: eleven :;
+      use EEE qw$ twelve $;
+      ```
+      
+      ???
+
+      Perl will not stop you from being creating with your use of parentheses, but if you start mixing these up, they can be very hard to read. A more uniform look will be easier for most people to understand quickly.
+      
+      ---
+
+      ## Bonus slides
+
       ---
       
       ## Don't require at the top level (unless you really need to)
@@ -1348,49 +1272,13 @@
       use DDD qw( four );
       ```
       
-      except for the fact that the `use` happens in a `BEGIN` block while the `require` does not. So, they are subtly different in that they'll be executed at different phases. With `require CCC;` we get the following compilation order.
-      
-      ```
-      $ perl -c -Ilib script/top-level-require.pl 2>/dev/null
-      
-      BEGIN AAA       import AAA
-      BEGIN BBB       import BBB
-      BEGIN DDD       import DDD
-      ```
-      
-      We can see that `require CCC;` was passed over entirely. That means that if module `CCC` does not exist or does not compile, we won't know about it until runtime. This is particularly meaningful if we are testing scripts. Sometimes the best you can reasonably do is ensure that the script compiles. With the `require` in place a compilation test will happily pass even if there is a serious problem with `CCC` -- like the fact that it may not exist.
-      
-      Now, if we run the script rather than just compiling it:
-      
-      ```
-      $ perl -Ilib script/top-level-require.pl
-      
-      BEGIN AAA       import AAA
-      BEGIN BBB       import BBB
-      BEGIN DDD       import DDD
-      BEGIN CCC
-      ```
-      
-      Here we see that `CCC` does finally get an `eval` after all of the other modules, but that an `import` never happens.
-      
-      If we run the script in the second format, where we've swapped out the `require` with the `use ... ()`:
-      
-      ```sh
-      $ perl -c -Ilib script/no-top-level-require.pl 2>/dev/null
-      
-      BEGIN AAA       import AAA
-      BEGIN BBB       import BBB
-      BEGIN CCC
-      BEGIN DDD       import DDD
-      ```
-      
-      Now we see that all of the modules are `eval`'ed in the compilation phase and that this happens in a predictable order. Still no call to `CCC->import()`.
-      
-      We've now established there there is a subtle but significant difference between `require CCC;` and `use CCC ();`. If we find a top level require in our code, this leaves code reviewers wondering if this difference is meaningful (Chesterton's Fence). 
-      
-      If there is no good reason for `require CCC;`, stick with `use CCC ();` in cases where you don't want `import()` to be run. The uniformity will make your code easier to understand. It's also easier for the eye to scan a long list of `use` statements which aren't interrupted by a `require` which is there for reasons nobody can quite explain.
-      
-      An added bonus to being discplined with `require` is that on the occasions where `require` is meaningful, your attention will be drawn to it. For example, when exporting from your own code you might `require Exporter`.
+      except for the fact that the `use` happens in a `BEGIN` block while the `require` does not -- it happens at runtime. So, they are subtly different in that they'll be executed at different phases.
+
+      ---
+
+      ## Require When You Need To
+
+      Being discplined with `require` is that on the occasions where `require` is meaningful, your attention will be drawn to it. For example, when exporting from your own code you might `require Exporter`.
       
       ```
       require Exporter;
@@ -1407,6 +1295,8 @@
       
       ## Only import Modules Which You Need
       
+      ???
+
       Don't import modules which you aren't currently using. If you're no longer using them, remove them. If you intend to use them in future, add them at that time. One exception to this rule is modules which you are pre-loading. For instance, you may want to ensure a module is loaded into memory before forking. In this case, add a comment to clarify that this is what you are doing. (Checkov's Gun).
       
       Doing so reduces the technical debt in your codebase as your colleagues will no longer have to reason about why this module which appears to do nothing, is in the codebase. (Chesterton's Fence).
@@ -1449,79 +1339,6 @@
       
       This imports 1 symbol into your package.
       
-      ---
-      
-      ## Use Empty Parens as Documentation
-      
-      ```
-      use LWP::UserAgent ();
-      ```
-      
-      `LWP::UserAgent` has no `import()`, so there's not really a functional difference between these two uses:
-      
-      ```perl
-      use LWP::UserAgent;
-      use LWP::UserAgent ();
-      ```
-      
-      However, the bare parens act as documentation saying "this module imports nothing". If you're intimately familiar with all of the modules in your codebase, this distinction may not be meaningful to you, but it can be meaningful to others who also need to work on it. If I see a list of imports that is disciplined in its use of parens, then the modules with the implicit imports immediately become more obvious.
-      
-      ```perl
-      use Moose;
-      
-      use Carp qw( croak );
-      use Data::Printer; # exports p() and np() by default
-      use LWP::UserAgent ();
-      use POSIX qw( ceil );
-      ```
-      
-      The magic of `Moose` happens when you import its symbols into your package. This is one case where implicit imports are a reasonable convention.
-      
-      For the record, those exports are:
-      
-      ```
-      .--------------------------.
-      | Default Exported Symbols |
-      +--------------------------+
-      | after                    |
-      | around                   |
-      | augment                  |
-      | before                   |
-      | blessed                  |
-      | confess                  |
-      | extends                  |
-      | has                      |
-      | inner                    |
-      | isa                      |
-      | meta                     |
-      | override                 |
-      | super                    |
-      | with                     |
-      '--------------------------'
-      ```
-      
-      Aside from the fact that `Data::Printer` exports `p()` and `np()` functions into your package, it also does other interesting things in your `import()`, like looking for user configuration files. Having this as the only import without parens makes clear that something special is happening here. You can also pass args to `Data::Printer`, but in the general case, if you're using it for quick debugging, you probably won't need to do this.
-      
-      ---
-      
-      # `Perl::Critic`
-      
-      There will be a brief discussion of existing `Perl::Critic` policies which try to address this. We will look at using `dump-perl-exports` as a tool to discover what a module really exports.
-      
-      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport)
-      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude)
-      * [Perl::Critic::Policy::ProhibitImplicitImport](https://metacpan.org/pod/Perl::Critic::Policy::ProhibitImplicitImport)
-      
-      See also:
-      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedConstant]()
-      * [Test::Vars](https://metacpan.org/pod/Test::Vars)
-      
-      ---
-      
-      # perlimports in vim
-      
-       We will discuss how to use similar techniques with a simple vim integration, so that imports can be cleaned up directly in the vim editor. If perlimports does not present itself as a workable solution for an audience member, the preceding discussion should provide some food for thought as to how technical debt on an existing code base can be reduced through wise use of import statements.
-
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
