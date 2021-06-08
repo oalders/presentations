@@ -783,7 +783,7 @@
 
       ## Creating a new package
       
-      ```
+      ```perl
           my $to_eval = <<"EOF";
       package $pkg;
       
@@ -826,8 +826,104 @@
       Using the techniques outlined above for `Exporter` and `Sub::Exporter` we can cover a lot of cases. If neither of the above techniques have shown us any evidence of symbols being exported, we can perform some other heuristics to determine whether we actually have an object-oriented module on our hands. If that comes up empty, we can also decide that in this case, we currently just don't know and that's ok too.
       
       ---
+
+      ## dump-perl-exports
+
+      ```sh
+      $ cmp install -g App::perlimports
+      $ dump-perl-exports --module Cpanel::JSON::XS
+      .----------.
+      | ISA      |
+      +----------+
+      | Exporter |
+      '----------'
+      .--------------------------.
+      | Default Exported Symbols |
+      +--------------------------+
+      | decode_json              |
+      | encode_json              |
+      | from_json                |
+      | to_json                  |
+      '--------------------------'
+      4 symbols
+      .------------------------.
+      | All Exportable Symbols |
+      +------------------------+
+      | decode_json            |
+      | encode_json            |
+      | from_json              |
+      | to_json                |
+      '------------------------'
+      4 symbols
+      ```
       
-      ## Comparing Possible vs Actual Imports
+      ???
+
+      To demonstrate what `perlimports` thinks is exportable, we can use the `dump-perl-exports` utility, which comes bundled with `App::perlimports`.
+
+      ---
+
+      ## Try::Tiny
+
+      ```sh
+      $ dump-perl-exports --module Try::Tiny
+      .--------------------------.
+      | Default Exported Symbols |
+      +--------------------------+
+      | catch                    |
+      | finally                  |
+      | try                      |
+      '--------------------------'
+      3 symbols
+      .------------------------.
+      | All Exportable Symbols |
+      +------------------------+
+      | catch                  |
+      | finally                |
+      | try                    |
+      '------------------------'
+      3 symbols
+      ```
+
+      ---
+
+      ## HTTP::Request::Commmon
+
+      ```sh
+      $ dump-perl-exports --module HTTP::Request::Common
+      .--------------------------.
+      | Default Exported Symbols |
+      +--------------------------+
+      | GET                      |
+      | HEAD                     |
+      | OPTIONS                  |
+      | PATCH                    |
+      | POST                     |
+      | PUT                      |
+      '--------------------------'
+      6 symbols
+      .------------------------.
+      | All Exportable Symbols |
+      +------------------------+
+      | $DYNAMIC_FILE_UPLOAD   |
+      | DELETE                 |
+      | GET                    |
+      | HEAD                   |
+      | OPTIONS                |
+      | PATCH                  |
+      | POST                   |
+      | PUT                    |
+      '------------------------'
+      8 symbols
+      ```
+
+      ???
+      
+      Here we can see that there are more total exportable symbols than there are default exportable symbols. That's because, as we discussed earlier, this module has the first 6 in `@EXPORT` and then an additional two in `@EXPORT_OK`.
+            
+      ---
+
+      ## Implementing perlimports
 
       * Parse a Perl document with https://metacpan.org/pod/PPI
       * Find all of the `use` and `require` statements
