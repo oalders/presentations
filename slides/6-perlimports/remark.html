@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+      
+      # perlimports: Where Did That Symbol Come From?
+      ## Olaf Alders, June 2021
+
+      ???
+
+      Today I want to talk about how imports are used in Perl.   
+    
+      My plan is to break this down into terms which even someone who is relatively new to Perl programming can understand. If you've already been writing Perl for a lot of years, please bear with me for the first few minutes. Sometimes a refresher on the basics can be a helpful.
+      
+      ---
+      
+      # Where did `GET` come from?
+      
+      ```perl
+      use HTTP::Request::Common;
+      use LWP::UserAgent;
+       
+      my $ua = LWP::UserAgent->new;
+      my $req = $ua->request( GET 'https://metacpan.org/' );
+      ```
+
+      ???
+      
+      If you're familiar with `HTTP::Request::Common`, this may be obvious to you. If you're not, then it's a bit more difficult. You see a `GET` somewhere in the code. You `grep` for it. You can't see where it's defined. Is it a Perl built-in? Did it appear by magic? Well, it sort of did.
+      
+      ---
+
+      # `@EXPORT` and Exporter
+
+      Defined inside of `HTTP::Request::Common` is the following line: 
+      
+      ```perl
+      our @EXPORT =qw(GET HEAD PUT PATCH POST OPTIONS);
+      ```
+      
+      This means that in your code 
+      
+      ```perl
+      use HTTP::Request::Common;
+      ``` 
+      
+      imports the following functions into to your package:
+      
+      ```
+      +--------------------------+
+      | GET                      |
+      | HEAD                     |
+      | OPTIONS                  |
+      | PATCH                    |
+      | POST                     |
+      | PUT                      |
+      '--------------------------'
+      ```
+
+      You can now use all of these functions without having to use a fully qualified name like `HTTP::Request::Common::GET()`. 
+
+      ???
+
+      `HTTP::Request::Common` uses a module called `Exporter`.  When your module is used without arguments, `Exporter` looks for an array called `@EXPORT` and imports everything listed in this array into the calling package.
+
+      You can now use all of these functions without having to use a fully qualified name like `HTTP::Request::Common::GET()`.       
+      
+      That's convenient, but from an outsider's perspective it can be very confusing. Keep in mind that an outsider might not be someone who isn't familiar with Perl. It could be someone who is not familiar with `HTTP::Request::Common`. 
+      
+      How do we make this clearer?
+      
+      ---
+      
+      # # `@EXPORT_OK` and Exporter
+      
+      Defined inside of `HTTP::Request::Common` is the following line: 
+
+      ```
+      our @EXPORT_OK = qw($DYNAMIC_FILE_UPLOAD DELETE);
+      ```
+            
+      ```perl
+      use HTTP::Request::Common qw( GET );
+      use LWP::UserAgent ();
+       
+      my $ua = LWP::UserAgent->new;
+      my $req = $ua->request( GET 'https://metacpan.org/' );
+      ```
+
+            
+      ```perl
+      use HTTP::Request::Common qw( DELETE );
+      use LWP::UserAgent ();
+       
+      my $ua = LWP::UserAgent->new;
+      my $req = $ua->request( DELETE 'https://example.com/some/url' );
+      ```
+
+      ???
+      
+      When your module is used with arguments, `Exporter` looks for an array called `@EXPORT` and an array called `@EXPORT_OK`. Each import argument which matches a symbol in either of these arrays will be imported into the calling package.  When a module is used with a list, `Exporter` will not import any symbols which you have not specifically asked for.
+
+      This imports `DELETE` and `GET`, but it does not import `HEAD`, `OPTIONS`, etc. So, we don't have symbols in our package which we don't intend to use.  We now are able to `grep` on `GET` and see where it is defined. Everybody wins!
+      
+      ---
+      
+      # What is an exportable Symbol?
+      
+      `Exporter.pm` allows the following symbols to be exported:
+      
+      * `some_function`
+      * `&some_function` (note the explicit `&` prefix)
+      * `$some_scalar`
+      * `@some_array`
+      * `%some_hash`
+      * `*some_typeglob`
+      
+      ???
+
+      `Exporter` is quite flexible in what it can export. It's a core Perl module and judging by the number of CPAN modules which depend on it, it may be the most popular.
+      
+      As we saw above, `Exporter` allows implicit imports, which will, by default, be imported into your package just by virtue of `use Module;`. This is both convenient and potentially a code maintenance problem.
+      
+      ---
+
+      # Where Did that Symbol Come From?
+    
+      ```perl
+      use POSIX;  # 582 symbols in @EXPORT
+      use Socket; # 170 symbols in @EXPORT
+      ```
+
+      ???
+
+      We've just seen that via `Exporter` we can import much more than just functions into our packages. We can also import variables and even typeglobs. We can import a huge number of functions by default. 
+
+      This can be a maintenance problem. For instance, you may come across some legacy code which includes a `use POSIX;`. We know from above that this imports 582 symbols into your package. Maybe you're not even using the symbols imported via the `POSIX` module. How can you know for sure?
+      
+      This brings us to two principles of software design and maintenance, Checkov's Gun and Chesterton's fence.
+      
+      ---
+      
+      # Checkhov's Gun 
+      
+      [Anton Chekhov](https://en.wikipedia.org/wiki/Anton_Chekhov) was a Russian playwright and short story writer. He is to have said:
+      
+      > "Remove everything that has no relevance to the story. If you say in the first chapter that there is a rifle hanging on the wall, in the second or third chapter it absolutely must go off. If it's not going to be fired, it shouldn't be hanging there"
+      
+      [https://en.wikipedia.org/wiki/Chekhov%27s_gun](https://en.wikipedia.org/wiki/Chekhov%27s_gun)
+
+      ???
+      
+      This is an excellent principle to apply to software design. If you introduce some code, you must use it. If you're not going to use it, it must be removed. If you are disciplined about this principle, later maintainers will know that everything in your codebase is there for a specific reason. If they encounter something which appears to be unused, this should raise a red flag. Which brings us to Chesterton's Fence.
+      
+      ---
+      
+      # Chesterton's Fence
+      
+      This is inspired by G. K. Chesterton's 1929 book "The Thing". A succinct definition of this principle is:
+      
+      > Do not remove a fence until you know why it was put up in the first place.
+      > 
+      
+      To quote from [https://fs.blog/2020/03/chestertons-fence/](https://fs.blog/2020/03/chestertons-fence/):
+      
+      > ...fences don’t grow out of the ground, nor do people build them in their sleep or during a fit of madness.... fences are built by people who carefully planned them out and “had some reason for thinking [the fence] would be a good thing for somebody.” Until we establish that reason, we have no business taking an ax to it. The reason might not be a good or relevant one; we just need to be aware of what the reason is. Otherwise, we may end up with unintended consequences: second- and third-order effects we don’t want, spreading like ripples on a pond and causing damage for years.
+
+      ???
+      
+      This reads like a principle created explicitly for software design. In production systems, it's a good idea not to remove something until you know what it was there in the first place, so that you don't set in motion a chain of events that was unintended.
+      
+      Module imports (and other code) are like this. Before we change or remove them, it's important to understand why they were there in the first place. This becomes much easier if previous work adhered to Checkhov's Gun, so that we can be more confident that the code in question did something meaningful rather than remaining as the result of sloppy work.
+      
+      ---
+      
+      ## Can We Automate This?
+      
+      ???
+
+      We can get fairly far by grepping through code and digging around documentation, but is there a faster way to do this? The Go programming language has an answer to this question.
+      
+      ---
+      
+      ## goimports
+      
+      [https://pkg.go.dev/golang.org/x/tools/cmd/goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
+      
+      > Command goimports updates your Go import lines, adding missing ones and removing unreferenced ones.
+      
+      Using this utility via the `vim-go` plugin has given me a great appreciation for not having to fiddle with imports.
+      
+      ---
+
+      ```go
+      package main
+      
+      import (
+          "fmt"
+          "log"
+          "net/url"
+      
+          "github.com/pariz/gountries"
+      )
+      
+      func main() {
+          url, err := url.Parse("https://www.google.com/search?q=schitt%27s+creek")
+          if err != nil {
+              log.Fatal(err)
+          }
+          q := url.Query()
+          fmt.Println(q.Get("q")) // nolintforbidigo
+      
+          countryObj, err := gountries.New().FindCountryByAlpha("CA")
+          if err != nil {
+              log.Fatal(err)
+          }
+          fmt.Printf("CA is also: %s", countryObj.Codes.Alpha3) // nolintforbidigo
+      }
+      ```
+      
+      ???
+
+      ```
+      vim go/demo/main.go
+      ```
+
+      This is a simple script which does some URL parsing and, unrelatedly, looks up a country by its ISO code, using a 3rd party library. `goimports` analyzes the code and organizes everything inside of the `import( )` section.
+      
+      You'll see that the libraries provided by the Go language are listed first, in alphabetical order. Then, after a blank line, third party libraries get listed.
+      
+      If I remove use of any of these libraries from the code and run `:GoImports` the unused libraries are removed from the import list. If I add a new standard library in the code `:GoImports` will add it to the `import` list for me, in the correct place. If I change the order of the imports, `:GoImports` will re-order them in the canonical way.
+      
+      This is a very basic example of what `goimports` can do, but it's incredibly powerful. It has taken a mundane task out of my hands. I don't need to think about the presentation of the code, or in many cases adding or removing libraries. `goimports` just does the right thing, when it knows how to do it.
+      
+      ---
+      
+      ## Can we write perlimports?
+      
+      Yes
+      
+      ---
+      
+      ## Will it be as good as goimports
+      
+      No
+      
+      ---
+      
+      ## The problem with imports in perl
+
+      * There is no one standard for importing symbols
+      * It's up to the author to decide what happens in `import()`
+      
+      ???
+
+      Trying to find out what every CPAN module does or does not export is kind of unknowable. 
+      
+      Having said that, we can actually get this to work in a lot of cases. It would be fun to see just how far we can get. Before we look at trying to solve this, let's define what we really mean when we say "import".
+      
+      ---
+      
+      ## pragmata
+
+      > A pragma is a module which influences some aspect of the compile time or run time behaviour of Perl such as `strict` or `warnings`.
+      
+      [https://perldoc.perl.org/perlpragma](https://perldoc.perl.org/perlpragma)
+      
+      That would be something like:
+      
+      ```perl
+      use strict;
+      use warnings;
+      ```
+      
+      ???
+            
+      Imports come up pretty quickly for people who are learning about Perl. One of the first things someone new to Perl learns is how to import a pragma. What may not be obviously clear to beginners is that what we're doing here is using two different modules, `strict.pm` and `warnings.pm`, like we would use any other module. It's just that these modules to much more than just make some new functions available. They enforce some best practices.
+
+      ---
+      
+      ## Modules
+      
+      Now that we know about `strict` and `warnings`, we might learn about importing CPAN modules. That might be as simple as 
+      
+      ```perl
+      use Mojo::Util qw( trim );
+      use Path::Tiny;
+      ```
+      
+      or with a minimum version requirement:
+      
+      ```perl
+      use POSIX 1.88 qw( ceil );
+      ```
+      
+      ???
+
+      The fact that you make a version requirement with a `use` statement is helpful to know, but it's outside of the scope for today, so we probably won't mention it beyond this point. 
+      
+      ---
+      
+      ## Behind the Scenes with `import`
+      
+      What is happening when we say `use Module;`? [https://perldoc.perl.org/functions/use](https://perldoc.perl.org/functions/use) tells us that 
+      
+      ```perl
+      use Module;
+      ``` 
+      
+      is equivalent to:
+      
+      ```perl
+      BEGIN { require Module; Module->import( LIST ); }
+      ```
+      
+      ???
+
+      Let's break this down. First off all, we can see `use` is essentially a `require` followed by an `import` and it all happens inside a `BEGIN` block.
+      
+      ---
+      
+      ## BEGIN blocks
+      
+      [https://perldoc.perl.org/perlmod#BEGIN%2C-UNITCHECK%2C-CHECK%2C-INIT-and-END](https://perldoc.perl.org/perlmod#BEGIN%2C-UNITCHECK%2C-CHECK%2C-INIT-and-END)
+      
+      > A BEGIN code block is executed as soon as possible, that is, the moment it is completely defined, even before the rest of the containing file (or string) is parsed. 
+      > 
+      > ...
+      > 
+      > BEGIN blocks run FIFO during compilation
+      
+      ???
+
+      Note that "FIFO" means "First In First Out" or essentially the order in which the code appears.
+      
+      ---
+      
+      ## Compile time vs run time
+      `BEGIN` blocks run during the code's compilation phase. 
+      
+      It's good to keep in mind that `perl script.pl` actually does two things:
+      
+      1. First, it compiles the code
+      1. Next, it executes/runs the code
+
+      ---
+
+      ## Compiling a Script
+      
+      `perl -c script.pl`
+
+      ???
+
+      To exit after compiliation, you may use the `-c` flag:
+      
+      ---
+      
+      ## Compilation: A Recap
+      
+      ```perl
+      use strict;
+      use warnings;
+      
+      use Carp;
+      ```
+      
+      is equivalent to:
+      
+      ```perl
+      BEGIN {
+          require strict;
+          strict->import;
+      }
+      BEGIN {
+          require warnings;
+          warnings->import;
+      }
+      
+      BEGIN {
+          require Carp;
+          Carp->import;
+      }
+      ```
+            
+      ---
+      
+      ## `require`
+
+      * tries to find the module in question
+      * possibly checks for a minimum version
+      * tries to eval the code
+      
+      Check [https://perldoc.perl.org/functions/require](https://perldoc.perl.org/functions/require) for more depth. 
+       
+      ???
+
+      For our purposes today, this is probably a "good enough" explanation.
+      
+      ---
+      
+      ## `import`
+      
+      > There is no builtin import function. It is just an ordinary method (subroutine) defined (or inherited) by modules that wish to export names to another module. The use function calls the import method for the package used.
+      
+      [https://perldoc.perl.org/functions/import](https://perldoc.perl.org/functions/import)
+      
+      ???
+
+      If your module has a defined (or inherited) `import` subroutine it will be called after a successful `require`. If it does not have such a subroutine, then compilation continues without any warnings. It's as if nothing happened.
+      
+      This is where it gets interesting for our purposes today, because what I just told you is a lie. Let's consider the following:
+      
+      ---
+      
+      ### The implicit import
+      ```perl
+      use POSIX;
+      ```
+      
+      ### The explicit import
+      ```perl
+      use POSIX qw( setsid );
+      ```
+      
+      ### The empty import
+      ```perl
+      use POSIX ();
+      ```
+      
+      ???
+
+      These examples demonstrate the three different ways in which we can `use` modules. Let's break them down individually.
+      
+      ---
+      
+      ## The implicit import
+      ```perl
+      use POSIX;
+      ```
+      
+      This is equivalent to:
+      
+      ```perl
+      BEGIN {
+          require POSIX;
+          POSIX->import;
+      }
+      ```
+      
+      ???
+
+      No big surprises here. This is essentially the example we've been dealing with up to this point.
+      
+      ---
+      
+      ## The explicit import
+      ```perl
+      use POSIX qw( setsid );
+      ```
+      
+      In this form, we're actually passing arguments to the `import` method of this module. This is equivalent to:
+      
+      ```perl
+      BEGIN {
+          require POSIX; 
+          POSIX->import( qw( setsid ) );
+      }
+      ```
+      
+      ???
+
+      So far, so good, with the exception of one thing. If you pass arguments to a module which has no `import` subroutine there will be no warning. Your arguments will silently be ignored and compilation will happily continue.
+
+      ## Passing Args to Modules With no import()
+      
+      ```perl
+      use ModuleWithNoImport qw( this that thing );
+      ```
+      is equivalent to
+      
+      ```perl
+      use ModuleWithNoImport;
+      ```
+      
+      ???
+
+      because there is nothing to import. Confused yet?
+      
+      ---
+      
+      ## The empty import
+      This brings us to our last form, the empty list import.
+      
+      ```perl
+      use POSIX ();
+      ```
+      
+      This is equivalent to:
+      
+      ```perl
+      BEGIN {
+          require POSIX;
+      }
+      ```
+
+      ???
+      
+      Hang on. What just happened here? It turns out that passing an empty list to `use` is a way of saying "I don't want to call the `import` subroutine". Let's keep that in mind as we move forward.
+      
+      To summarize, there are now two cases in which the `import` subroutine is not called. The first is when it does not exist and the second is when an empty list is passed as an argument to `use` as in `use POSIX ();`
+      
+      ---
+      
+      ## What Does `import()` Actually Do?
+      
+      ```perl
+      use Carp qw( croak );
+      ```
+
+      ???
+
+      This is kind hard to answer. There are some conventions around how might happen when a module's `import` gets called. In the general case for modules which export functions, saying 
+
+      ```perl
+      use Carp qw( croak );
+      ```
+
+      means that you now have a `croak` function available in the package where you issued the `use` statement.
+      
+      However, there is no binding contract to say that this must be the case.
+      
+      ---
+      
+      ## `import()`: What Does it Expect?
+      
+      What can be passed as values to `import()` is left up to the implementor.
+
+        * `use DDP max_depth => 2, deparse => 1;`
+        * `use Test::More import => [ 'done_testing', 'is', 'ok' ];`
+        * `use Test::Needs { perl => 5.020 };`
+        * `use HTTP::Status qw(:constants :is status_message);`
+      
+      ---
+      
+      ## Multiple Imports of the Same Module
+      
+      Since `import` is just a method on a class, you can call it as many times as you like:
+      
+      ```perl
+      use Module ();
+      use Module qw( some_function );
+      use Module qw( :SOME_TAG );
+      use Module qw( some_function );
+      require Module;
+      ```
+      
+      ???
+
+      After the code has been successfully required, additional requires should be a no-op, but the import statements will still get called. For readability of code, this not a great idea, but there's generally nothing stopping you from doing this.
+      
+      ---
+      
+      ## Writing perlimports
+      
+      That's enough background. Let's talk about implementing `perlimports`. We'll start with detecting what happens with `Exporter`, since it covers a lot of cases and it's probably the easiest task.
+      
+      ---
+      
+      ## Defeating Exporter
+      
+      ```
+      use POSIX;
+      
+      no strict 'refs';
+      my @implicit = @{ $self->_module_name . '::EXPORT' };
+      my @explicit = @{ $self->_module_name . '::EXPORT_OK' }, @implicit;
+      ```
+      
+      ???
+
+      This is actually not so bad. As we've already seen, modules using `Exporter` define package level variables called `@EXPORT` and `@EXPORT_OK`, it's not hard to assess what they can or cannot export.
+      
+      It's entirely possible for a module which uses `Exporter` to do export in other ways as well, but we're generally covered for this case.
+      
+      ---
+      
+      ## Defeating Sub::Exporter
+
+      * Exports only subs (as the name implies)
+      * Doesn't have anything like `@EXPORT` or `@EXPORT_OK`
+      
+      ???
+      
+      `Sub::Exporter` is another very popular exporter module, but it's a tougher nut to crack. As the name implies, it exports subs, not variables. So, we know we don't have to worry about variables. However, `Sub::Exporter` doesn't have any package variables we can inspect like `@EXPORT` and `@EXPORT_OK`. Also, it has a really flexible API. It would be hard for us to look at how `Sub::Exporter` is called and know exactly what is coming back out without poking at internals or reimplementing part of the module. However, there are a couple of things we can do.
+
+      ---
+
+      ## `Sub::Exporter` Groups
+
+      ```perl
+      use Module; # group "default" (empty unless otherwise set)
+      use Module qw( :all ); # exports everything
+      ```
+
+      [https://metacpan.org/pod/Sub::Exporter#Default-Groups](https://metacpan.org/pod/Sub::Exporter#Default-Groups)      
+
+      ???
+
+      Using the two invocations above we can generally import all of the subs which a `Sub::Exporter` module exports implicitly and alse explicitly. How do we programmatically figure out what we've imported?
+
+      
+      ---
+      
+      ## Enter the symbol table
+      
+      What exactly is a symbol table? 
+      
+      > The symbol table for a package happens to be stored in the hash of that name with two colons appended. The main symbol table's name is thus %main::, or %:: for short.
+      
+      [https://perldoc.perl.org/perlmod#Symbol-Tables](https://perldoc.perl.org/perlmod#Symbol-Tables) 
+      
+
+      ---
+
+      ## Inspecting the Symbol Table
+
+      So, if you haven't declared a package name, you can find your symbol table at `%main::` or even just `%::`. If you're in `package MyModule;`, you can find your symbol table in `%MyModule::`.
+      
+      Try this one-liner to get an idea what's in `%main::` by default:
+      
+      `perl -e "require Data::Dumper;print Data::Dumper::Dumper( { %main:: } );"`
+      
+      ???
+
+      `perl -e "require Data::Dumper;print Data::Dumper::Dumper( { %main:: } );"`
+
+      ---
+      
+      ## Importing functions
+      
+      When a package imports subroutines and other symbols from other modules, they appear in that package's symbol table. That's essentially the magic behind imports. 
+      
+      To import `Data::Dumper`'s `Dumper()` sub into your script without using a module:
+      
+      ```perl
+      *{'main::Dumper'} = \&{'Data::Dumper::Dumper'};
+      ```
+      
+      ???
+
+      What we're doing here is essentially creating an alias to `Data::Dumper::Dumper()` in package `main`.
+      
+      ---
+      
+      ## Importing Variables
+      
+      We can use the same trick with variables.
+      
+      ```perl
+      our $dumper_version;
+      *{'main::dumper_version'} = \${'Data::Dumper::VERSION'};
+      
+      print $dumper_version;        # prints 2.181
+
+      ++$dumper_version;
+      print $Data::Dumper::VERSION; # prints 3.181
+      ```
+            
+      ???
+    
+      We've created an alias to a variable which is not read-only, since `our $VERSION` is, by default, not a constant. So, if you're going to export variables, you're better off exporting constants. See `Exporter::Constants`, 
+      
+      ---
+
+      ## Import::Into
+
+      * Import entire packages into other packages
+
+      ???
+
+      As a quick diversion, I should mention `Import::Into`. This module allows you to import entire packages into another package, making it trivial to, for example, write your own flavour of Moose.
+
+      ---
+
+      ## Create Your Own Moose
+
+      ```perl
+      use strict;
+      use warnings;
+       
+      package MetaCPAN::Moose;
+      $MetaCPAN::Moose::VERSION = '0.000003';
+      use Import::Into;
+       
+      sub import {
+          $_->import::into( scalar caller )
+              for qw( Moose MooseX::StrictConstructor namespace::autoclean );
+      }
+       
+      1;
+      ```
+      
+      https://metacpan.org/pod/MetaCPAN::Moose
+
+      ---
+
+      ## Create Your Own perl
+
+      [https://metacpan.org/pod/App::GHPT::Wrapper::Ourperl](https://metacpan.org/pod/App::GHPT::Wrapper::Ourperl)
+
+      * Follow the pattern in this module, which uses `Import::Into`
+      * Name it `myperl` or whatever you like
+      * Enable `strict`, `warnings`, `signatures`, `postderef`, etc
+      * Then `use myperl;`
+        * avoid a lot of boilerplate
+        * enforce pragmas consistently across your codebase
+      
+      ---
+
+      ## Putting it all Together
+
+      ???
+
+      We've now seen the power of the manipulating the symbol table. We can do everything from aliasing a function to importing an entire package. Luckily `Sub::Exporter` only exports subs. So, how do we track which subs have been added to the symbol table?
+
+      ---
+
+      ## The Strategy
+
+      * Given a module: MyModule
+
+      ---
+
+      ## The Strategy
+
+      * Given a module: MyModule
+      * Create a brand new package `SomePackageName`, which has a fresh symbol table
+
+      ---
+
+      ## The Strategy
+
+      * Given a module: MyModule
+      * Create a brand new package `SomePackageName`, which has a fresh symbol table
+      * `use MyModule` inside this package
+
+      ---
+
+      ## The Strategy
+
+      * Given a module: MyModule
+      * Create a brand new package `SomePackageName`, which has a fresh symbol table
+      * `use MyModule` inside this package
+      * `eval SomePackageName` into life 
+
+      ---
+
+      ## The Strategy
+
+      * Given a module: MyModule
+      * Create a brand new package `SomePackageName`, which has a fresh symbol table
+      * `use MyModule` inside this package
+      * `eval SomePackageName` into life 
+      * Track the changes to the `SomePackageName`'s symbol table
+
+      ---
+
+      ## Creating a new package
+      
+      ```
+          my $to_eval = <<"EOF";
+      package $pkg;
+      
+      use Symbol::Get;
+      $use_statement
+      our \@__EXPORTABLES;
+      
+      BEGIN {
+          \@__EXPORTABLES = Symbol::Get::get_names();
+      }
+      1;
+      EOF
+      ```
+
+      ???
+      
+      We use a `BEGIN` block so that we can get a list all of the names which have been added to the symbol table before modules like `namespace::autoclean` have a chance to remove them.
+      
+      ---
+
+      ## The eval
+
+      After this we simply
+      
+      ```perl
+      eval $eval;
+      
+      no strict 'refs';
+      my @found_imports = @{ $pkg . '::__EXPORTABLES' };
+      ```
+      
+      * `$use_statement` will be either `use Module;` or `use Module qw( :all );` to cover both cases for `Sub::Exporter`.
+      
+      ---
+      
+      ## That covers a lot of cases
+      
+      ???
+
+      Using the techniques outlined above for `Exporter` and `Sub::Exporter` we can cover a lot of cases. If neither of the above techniques have shown us any evidence of symbols being exported, we can perform some other heuristics to determine whether we actually have an object-oriented module on our hands. If that comes up empty, we can also decide that in this case, we currently just don't know and that's ok too.
+      
+      ---
+      
+      ## Comparing Possible vs Actual Imports
+
+      * Parse a Perl document with https://metacpan.org/pod/PPI
+      * Find all of the `use` and `require` statements
+      * Try to assert what each module can actually export
+      * Analyze the code to find symbols which match the possible exports
+      * Maybe rewrite the existing `use` and `require` statements
+
+      ???
+
+      Now that we've done the hard work of trying to figure out what a module really exports, we can parse documents with PPI and possibly rewrite them. That's the tedious part of the process, which `perlimports` handles on our behalf.
+
+      ---
+
+      ## Best Practices
+      
+      ### use strict and warnings
+      
+      The first import statements in your package should be:
+      
+      ```perl
+      use strict;
+      use warnings;
+      ```
+      
+      or some equivalent module or pragma which also enables these.
+      
+      ```perl
+      use Moose; # or use Moo;
+      ```
+      
+      or 
+      
+      ```perl
+      use myownpragma;
+      ```
+         
+      ???
+
+      Import declarations are where we document which symbols are available to the enclosed code. In order to best help others (and future versions of ourselves) best understand what this code actually needs, we can follow a few simple rules.
+
+      ---
+      
+      ### other pragmas
+      
+      Unless you need to enable other pragmas in a specific order, add them after `strict` and `warnings`.
+      
+      ```perl
+      use strict;
+      use warnings;
+      
+      our $VERSION = '1.0.0';
+      
+      use feature qw( signatures );
+      use namespace::autoclean;
+      no warnings qw( experimental::signatures );
+      ```
+      
+      ???
+
+      If this is a CPAN module, you may want to add the `$VERSION string after warnings and before the other 
+      pragmas.
+
+      ---
+      
+      ### Everything Else
+      
+      Leave a space after the pragmata and then include the other modules you need, alpha-sorted unless, for some reason, order matters.
+      
+      ```perl
+      use strict;
+      use warnings;
+
+      use feature qw( signatures );
+      no warnings qw( experimental::signatures );
+      
+      use Carp qw( croak );
+      use Mojo::Util qw( trim );
+      use POSIX ();
+      ```
+      
+      ## Avoid Long Lines
+
+      `use` statements which would stretch beyond 78 characters, should try to pass arguments one per line, alpha-sorted, for readability.
+      
+      ```perl
+      use strict;
+      use warnings;
+      
+      our $VERSION = '1.0.0';
+      
+      use feature qw( signatures );
+      no warnings qw( experimental::signatures );
+      
+      use Carp qw( croak );
+      use HTTP::Status qw(
+          is_cacheable_by_default
+          is_client_error
+          is_error
+          is_info
+          is_redirect
+          is_server_error
+          is_success
+          status_message
+      );
+      use Mojo::Util qw( trim );
+      use POSIX ();
+      ```
+      
+      ---
+      
+      ## Sort Your use Statements
+      
+      ???
+
+      If everything is alpha-sorted, it makes it easier to see what has been used multiple times. You might be surprised how often this happens when use statements are not sorted. Keep in mind that they may not always be introduced intentionally. If you are rebasing in `git` and sorting out a merge conflict among import statements, it can be easy to introduce a second use of the same module accidentally.
+      
+      ---
+      
+      ## Stick With One Style of Parens
+      
+      ```perl
+      use EEE qw/ two /;
+      use EEE qw< three >;
+      use EEE qw' four ';
+      use EEE qw{ five };
+      use EEE qw| six |;
+      use EEE ( 'seven' );
+      use EEE 'eight';
+      use EEE qw+ nine +;
+      use EEE qw* ten *;
+      use EEE qw: eleven :;
+      use EEE qw$ twelve $;
+      ```
+      
+      ???
+
+      Perl will not stop you from being creating with your use of parentheses, but if you start mixing these up, they can be very hard to read. A more uniform look will be easier for most people to understand quickly.
+      
+      ---
+      
+      ## Stick With One Style of Padding
+      
+      A consistent use of padding with arguments also makes for a more uniform, readable list. Either a single space
+      
+      ```perl
+      use AAA qw( one );
+      use BBB qw( two );
+      ```
+      
+      or no padding at all
+      
+      ```perl
+      use AAA qw(one);
+      use BBB qw(two);
+      ```
+      
+      If you mix them up, it gets harder to read.
+      
+      ```perl
+      use AAA qw(one);
+      use BBB qw( two );
+      use CCC qw( three);
+      use DDD qw(four );
+      ```
+      
+      ---
+      
+      ## Avoid Export Tags
+      
+      Using import tags, our previous example might have looked like
+      
+      ```perl
+      use strict;
+      use warnings;
+      use feature qw( signatures );
+      no warnings qw( experimental::signatures );
+      
+      use Carp qw( croak );
+      use HTTP::Status qw( :is status_message );
+      use Mojo::Util qw( trim );
+      use POSIX ();
+      ```
+      
+      ???
+
+      An export tag is essentially an alias for a group of symbols to import. A tag can provide a convenient shorthand, but it obscures where symbols have been imported from. They are maybe slightly better than an implicit import, but it's much easier to grep on things if you avoid them entirely. 
+
+      This is more succinct, but a `grep` on `is_client_error` will not yield anything in the `use` statements, which means more digging around, unless you're already quite familiar with `HTTP::Status` and its export tags.
+      
+      ---
+      
+      ## Don't Be Clever
+      
+      The `Exporter` docs advertise this supported syntax:
+      
+      ```perl
+      use Socket qw(!/^[AP]F_/ !SOMAXCONN !SOL_SOCKET);
+      use POSIX  qw(:errno_h :termios_h !TCSADRAIN !/^EXIT/);
+      ```
+      
+      In order to figure out what's being imported you need to 
+      
+      * be very familiar with what `Socket` and `POSIX` export 
+      * know that they use the `Exporter` module
+      * look up `Exporter`'s documentation to figure out what's going on here
+      
+      ???
+
+      Think of the children. Also think of your colleagues who are not intimately familiar with Perl, who may occasionally need to poke at your code. If you make they jump through these kinds of hoops to figure out what's going on, they will not thank you.
+      
+      ---
+      
+      ## If You Insist on Cleverness
+      
+      The solution to figuring out what `Exporter` does in the previous instance is incomplete. The `Exporter` docs point out that there is a debugging tool at your disposal.
+      
+      ```perl
+      BEGIN { $Exporter::Verbose=1 }
+      use Socket qw(!/^[AP]F_/ !SOMAXCONN !SOL_SOCKET);
+      use POSIX  qw(:errno_h :termios_h !TCSADRAIN !/^EXIT/);
+      ```
+      
+      ### Demo: `perl script/verbose-exporter.pl`
+      
+      ---
+      
+      ## Use Modules Once
+      
+      Unless you have a compelling reason, don't do this:
+      
+      ```perl
+      use Carp qw( croak );
+      use Carp qw( confess );
+      ```
+      
+      ???
+
+      Inevitably what will happen is that your code will, at some future date, stop using `Carp` entirely, but one of the statements will remain because it got missed. This can happen quite easily if you have a long list of unsorted imports. At that point, someone will be left wondering why it is there (see: Checkov's Gun) and whether they can remove it (see: Chesterton's Fence).
+      
+      ---
+      
+      ## Don't require at the top level (unless you really need to)
+      
+      ```perl
+      use AAA qw( one );
+      use BBB qw( two );
+      require CCC;
+      use DDD qw( four );
+      ```
+      is basically equivalent to:
+      
+      ```perl
+      use AAA qw( one );
+      use BBB qw( two );
+      use CCC ();
+      use DDD qw( four );
+      ```
+      
+      except for the fact that the `use` happens in a `BEGIN` block while the `require` does not. So, they are subtly different in that they'll be executed at different phases. With `require CCC;` we get the following compilation order.
+      
+      ```
+      $ perl -c -Ilib script/top-level-require.pl 2>/dev/null
+      
+      BEGIN AAA       import AAA
+      BEGIN BBB       import BBB
+      BEGIN DDD       import DDD
+      ```
+      
+      We can see that `require CCC;` was passed over entirely. That means that if module `CCC` does not exist or does not compile, we won't know about it until runtime. This is particularly meaningful if we are testing scripts. Sometimes the best you can reasonably do is ensure that the script compiles. With the `require` in place a compilation test will happily pass even if there is a serious problem with `CCC` -- like the fact that it may not exist.
+      
+      Now, if we run the script rather than just compiling it:
+      
+      ```
+      $ perl -Ilib script/top-level-require.pl
+      
+      BEGIN AAA       import AAA
+      BEGIN BBB       import BBB
+      BEGIN DDD       import DDD
+      BEGIN CCC
+      ```
+      
+      Here we see that `CCC` does finally get an `eval` after all of the other modules, but that an `import` never happens.
+      
+      If we run the script in the second format, where we've swapped out the `require` with the `use ... ()`:
+      
+      ```sh
+      $ perl -c -Ilib script/no-top-level-require.pl 2>/dev/null
+      
+      BEGIN AAA       import AAA
+      BEGIN BBB       import BBB
+      BEGIN CCC
+      BEGIN DDD       import DDD
+      ```
+      
+      Now we see that all of the modules are `eval`'ed in the compilation phase and that this happens in a predictable order. Still no call to `CCC->import()`.
+      
+      We've now established there there is a subtle but significant difference between `require CCC;` and `use CCC ();`. If we find a top level require in our code, this leaves code reviewers wondering if this difference is meaningful (Chesterton's Fence). 
+      
+      If there is no good reason for `require CCC;`, stick with `use CCC ();` in cases where you don't want `import()` to be run. The uniformity will make your code easier to understand. It's also easier for the eye to scan a long list of `use` statements which aren't interrupted by a `require` which is there for reasons nobody can quite explain.
+      
+      An added bonus to being discplined with `require` is that on the occasions where `require` is meaningful, your attention will be drawn to it. For example, when exporting from your own code you might `require Exporter`.
+      
+      ```
+      require Exporter;
+      our @ISA = qw(Exporter);
+      ```
+      
+      Having said that, you can get to the same place without the `require`:
+      
+      ```
+      use Exporter qw( import );
+      ```
+      
+      ---
+      
+      ## Only import Modules Which You Need
+      
+      Don't import modules which you aren't currently using. If you're no longer using them, remove them. If you intend to use them in future, add them at that time. One exception to this rule is modules which you are pre-loading. For instance, you may want to ensure a module is loaded into memory before forking. In this case, add a comment to clarify that this is what you are doing. (Checkov's Gun).
+      
+      Doing so reduces the technical debt in your codebase as your colleagues will no longer have to reason about why this module which appears to do nothing, is in the codebase. (Chesterton's Fence).
+      
+      A side effect of this is that can makes dependency management easier. Once unneccessary module imports are removed, it becomes more obvious which modules can be removed from your dependencies entirely. This may make for one less module which you need to install or perhaps even more, if this module itself depends on other packages which you aren't otherwise using. Less dependencies to install means less things which can go wrong when developing or even deploying your application.
+      
+      Also consider that using fewer modules can reduce your memory footprint and even startup time. Paring down the amount of required code has multiple benefits. Pulling in dependencies which you are not using, but contrast, is generally a net negative. 
+      
+      ---
+      
+      ## Only import Symbols Which You Need
+      
+      ```perl
+      use AAA qw( one two three four five six );
+      
+      print three();
+      ```
+      
+      Don't import symbols which you aren't currently using. If you're no longer using them, remove them. If you intend to use them in future, add them at that time. (Checkov's Gun).
+      
+      ```perl
+      use AAA qw( three );
+      
+      print three();
+      ```
+      
+      ---
+      
+      ## Avoid Implicit Imports at All Costs
+      
+      ```perl
+      use POSIX;
+      ```
+      
+      That imports 761 symbols into your package. Do you know what they are? Can you possibly keep this in memory?
+      
+      ```perl
+      use POSIX qw( ceil );
+      ```
+      
+      This imports 1 symbol into your package.
+      
+      ---
+      
+      ## Use Empty Parens as Documentation
+      
+      ```
+      use LWP::UserAgent ();
+      ```
+      
+      `LWP::UserAgent` has no `import()`, so there's not really a functional difference between these two uses:
+      
+      ```perl
+      use LWP::UserAgent;
+      use LWP::UserAgent ();
+      ```
+      
+      However, the bare parens act as documentation saying "this module imports nothing". If you're intimately familiar with all of the modules in your codebase, this distinction may not be meaningful to you, but it can be meaningful to others who also need to work on it. If I see a list of imports that is disciplined in its use of parens, then the modules with the implicit imports immediately become more obvious.
+      
+      ```perl
+      use Moose;
+      
+      use Carp qw( croak );
+      use Data::Printer; # exports p() and np() by default
+      use LWP::UserAgent ();
+      use POSIX qw( ceil );
+      ```
+      
+      The magic of `Moose` happens when you import its symbols into your package. This is one case where implicit imports are a reasonable convention.
+      
+      For the record, those exports are:
+      
+      ```
+      .--------------------------.
+      | Default Exported Symbols |
+      +--------------------------+
+      | after                    |
+      | around                   |
+      | augment                  |
+      | before                   |
+      | blessed                  |
+      | confess                  |
+      | extends                  |
+      | has                      |
+      | inner                    |
+      | isa                      |
+      | meta                     |
+      | override                 |
+      | super                    |
+      | with                     |
+      '--------------------------'
+      ```
+      
+      Aside from the fact that `Data::Printer` exports `p()` and `np()` functions into your package, it also does other interesting things in your `import()`, like looking for user configuration files. Having this as the only import without parens makes clear that something special is happening here. You can also pass args to `Data::Printer`, but in the general case, if you're using it for quick debugging, you probably won't need to do this.
+      
+      ---
+      
+      # `Perl::Critic`
+      
+      There will be a brief discussion of existing `Perl::Critic` policies which try to address this. We will look at using `dump-perl-exports` as a tool to discover what a module really exports.
+      
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport)
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude)
+      
+      See also:
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedConstant]()
+      * [Test::Vars](https://metacpan.org/pod/Test::Vars)
+      
+      ---
+      
+      # perlimports in vim
+      
+       We will discuss how to use similar techniques with a simple vim integration, so that imports can be cleaned up directly in the vim editor. If perlimports does not present itself as a workable solution for an audience member, the preceding discussion should provide some food for thought as to how technical debt on an existing code base can be reduced through wise use of import statements.
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
