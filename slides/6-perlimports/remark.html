@@ -46,7 +46,7 @@
       
       ---
 
-      # `@EXPORT` and Exporter
+      ## `@EXPORT` and Exporter
 
       Defined inside of `HTTP::Request::Common` is the following line: 
       
@@ -87,7 +87,7 @@
       
       ---
       
-      # # `@EXPORT_OK` and Exporter
+      ## `@EXPORT_OK` and Exporter
       
       Defined inside of `HTTP::Request::Common` is the following line: 
 
@@ -830,7 +830,7 @@
       ## dump-perl-exports
 
       ```sh
-      $ cmp install -g App::perlimports
+      $ cpm install -g App::perlimports
       $ dump-perl-exports --module Cpanel::JSON::XS
       .----------.
       | ISA      |
@@ -935,6 +935,172 @@
 
       Now that we've done the hard work of trying to figure out what a module really exports, we can parse documents with PPI and possibly rewrite them. That's the tedious part of the process, which `perlimports` handles on our behalf.
 
+      ---
+
+      ## Live demo
+
+      ???
+
+      Run `perlimports` in scripts in `untidy` folder.
+
+      ---
+
+      ## vim integration
+
+      ```vim
+      " Try to fix module imports.
+      " Visually select a block of use and/or require statements.
+      " Then "im" will run perlimports on the selected statements.
+      :vnoremap <silent> im :!perlimports
+        \ --read-stdin
+        \ --libs lib,t/lib,dev/lib
+        \ --log-level error 
+        \ --no-preserve-duplicates
+        \ --no-preserve-unused
+        \ --filename '%:p'<CR>      ```
+
+        ???
+
+        * no-preserve-duplicates will convert multiple use statements of the same module into one statement
+        * no-preserve-unused will remove use statements which appear to be unneccessary
+
+      ---
+
+      ## Ignoring a Statement 
+
+      Sometimes you don't want a module tidied. You have your reasons.
+
+      ```perl
+      use Module qw( one );
+      use Unusual::Module '-DOSOMETHING', some => 'list'; ## no perlimports
+      ```
+
+      ---
+
+      ## Ignoring Blocks of Statements
+
+      ```perl
+      # preload everything in this block 
+      ## no perlimports
+      use AAA ();
+      use BBB ();
+      use CCC ();
+      ## use perlimports
+      ```      
+      ---
+
+      ## Ignoring Modules via cli 
+
+      ```sh
+      perlimports --ignore-modules Test::More,Test::Most
+      ```
+
+      ```sh
+      perlimports --ignore-modules-filename /path/to/file
+      ```
+
+      ???
+
+      These modules will never be tidied
+      ---
+
+      ## Enforcing Empty Imports via cli
+
+      ```sh
+      perlimports --never-export-modules LWP::UserAgent,WWW::Mechanize
+      ```
+
+      ```sh
+      perlimports --never-export-modules-filename /path/to-file
+      ```
+
+      All instances of `use LWP::UserAgent` will become `use LWP::UserAgent ();`
+
+      ???
+
+      These modules will always be rewritten to have empty imports
+
+      ---
+
+      ## Consistent Padding
+
+      ```perl
+      use Mojo::Util qw( trim ); # default for perlimports
+      ```
+
+      ```sh
+      perlimports --no-padding
+      ```
+
+      becomes
+      
+      ```perl
+      use Mojo::Util qw(trim);
+      ```
+      ---
+
+      ## Sort order
+
+      * Imported symbols are alpha-sorted
+
+      ```perl
+      use Module qw( d a c b );
+      ```
+
+      becomes
+
+      ```perl
+      use Module qw( a b c d );
+      ```
+
+      ---
+
+      ## Long lines
+
+      * After 78 characters, long lines are broken up.
+
+      Before:
+
+      ```perl
+      use Database::Migrator::Types qw( HashRef ArrayRef Object Str Bool Maybe CodeRef FileHandle RegexpRef );
+      ```
+
+      After:
+
+      ```perl
+      use Database::Migrator::Types qw(
+          ArrayRef
+          Bool
+          CodeRef
+          FileHandle
+          HashRef
+          Maybe
+          Object
+          RegexpRef
+          Str
+      );
+      ```
+      ---
+
+      ## Moose Type Aware
+
+      ```sh
+      dump-perl-exports --module MooseX::Types::Moose
+      ```
+
+
+      ---
+
+      ## Enforcing via Perl::Critic
+
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport)
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude)
+      * [https://metacpan.org/dist/Perl-Critic-Policy-ProhibitImplicitImport](https://metacpan.org/dist/Perl-Critic-Policy-ProhibitImplicitImport)
+
+      See also:
+      * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedConstant]()
+      * [Test::Vars](https://metacpan.org/pod/Test::Vars
+      
       ---
 
       ## Best Practices
@@ -1344,6 +1510,7 @@
       
       * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedImport)
       * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude](https://metacpan.org/pod/Perl::Critic::Policy::TooMuchCode::ProhibitUnusedInclude)
+      * [Perl::Critic::Policy::ProhibitImplicitImport](https://metacpan.org/pod/Perl::Critic::Policy::ProhibitImplicitImport)
       
       See also:
       * [Perl::Critic::Policy::TooMuchCode::ProhibitUnusedConstant]()
