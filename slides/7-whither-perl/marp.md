@@ -1,4 +1,4 @@
-# Whither Perl?
+# Whither Perl? 🧭
 
 Olaf Alders
 
@@ -10,13 +10,15 @@ https://metacpan.org/author/OALDERS
 olaf@wundersolutions.com
 
 Note:
+
 * Thank the organizers and volunteers
 * What's currently going on in the world of Perl?
 * What got us here?
 * What can we do to keep things moving?
 ---
 
-# The History (or some version of it)
+## The History 📚 
+### (or some version of it)
 
 Note:
 * It's safe to say that Perl's market share has long been in decline
@@ -25,7 +27,7 @@ Note:
 
 ---
 
-# There's no going back
+## There's no going back ◀️
 
 Note:
 * We can't restore Perl to its former glory
@@ -35,22 +37,14 @@ Note:
 
 ---
 
-# But should be a vision moving forward?
-
-Note:
-* Whose vision is it?
-* Is anyone steering the ship?
-
----
-
-# Is Perl dead?
+## Is Perl dead? 🪦
 
 Note:
 * Life and death are essentially binary states
 
 ---
 
-# Can a language really die?
+## Can a language really die? ⚰️
 
 Note:
 * Is this even a helpful bucket to put a language in?
@@ -60,7 +54,7 @@ Note:
 
 ---
 
-# Is Language X dead?
+## Is Language X dead? 👻
 
 Note:
 * This has been coming up for years and it prompts lively debate, but are we even asking the right question?
@@ -69,15 +63,15 @@ Note:
 
 ---
 
-## What does your application really need?
+### What does your application really need? 🛒 
 
 * Static type checks
 * Speed
-* High performance in a resource-starved environment?
+* High performance in a resource-starved environment
 
 ---
 
-## What does your application really need?
+### What does your application really need? 🐪 
 
 * Expressive syntax
 * To be prototyped quickly
@@ -88,7 +82,7 @@ Depending on your answers to the above, Perl may or may not be the right choice 
 
 ---
 
-# Protoyping vs Scaling
+## Protoyping vs Scaling ⚖️
 
 * Sometimes the language you prototype with is not the language you scale with
 
@@ -100,7 +94,7 @@ Note:
 
 ---
 
-# The Perl to [Java|Go|whatever] rewrite
+## The Perl to [Java|Go|whatever] rewrite ☕
 
 Note:
 * The lasting impact is that over time, we lose financial backing
@@ -109,14 +103,39 @@ Note:
 
 ---
 
-# Language Activity Indicators
+## Donations Matter -- a lot 💳
+
+* grants
+* conferences (TPRC, Perl Toolchain Summit, etc)
+* infrastructure for hosting etc.
+
+Note:
+Without donations, a lot of things we care about are in danger
+---
+
+## Money is Better Than In-Kind Donations 💶
+
+* donated equipment and services can disappear
+  * new management
+  * new ownership
+  * shifting priorities
+* sometimes donated services disappear with very little notice
+
+Note:
+The first donated MetaCPAN servers went offline with only 60 days notice.
+Luckily EPO helped us get a new sponsorship with Bytemark, which we've
+continued for many years since then.
+
+---
+
+## Language Activity Indicators 📊
 
 Note:
 * Let's take a look at several different indicators to get an idea of where we might be at
 
 ---
 
-# CPAN Activity is on a downward trajectory
+## CPAN Activity is on a downward trajectory
 
 See http://neilb.org/2022/02/07/cpan-report-2022.html
 
@@ -128,7 +147,100 @@ Note:
 
 ---
 
-# So much friction
+![](img/pause-signups-per-year.png)
+
+---
+
+![](img/cpan-first-time-releasers-per-year.png)
+
+---
+
+![](img/cpan-releasers-per-year.png)
+
+---
+
+![](img/cpan-innovators-per-year.png)
+
+---
+
+![](img/pause-monthly-signups.png)
+
+---
+
+![](img/cpan-new-releasers-by-month.png)
+
+---
+
+![](img/new-users-who-never-released.png)
+
+---
+
+![](img/number-of-times-each-user-released.png)
+
+---
+
+![](img/distributions-per-author.png)
+
+Note:
+his is how many different distributions have PAUSE users released.
+Excludes people who have never released
+
+---
+
+![](img/time-to-first-release.png)
+
+Note:
+For people who do at least one release, how long was it between them signing up
+and doing their first release?
+
+The "1 Week" means "within the first week, but not on the first day", and so
+on. Everyone who’s going to release does it within a year of getting their
+account, but a good chunk wait more than a month.
+
+But nearly half of them release within a week, so we can assume that they’re
+signing up because they’ve got something to release (or they’re reading
+Intermediate Perl and releasing a dummy/test distribution.
+
+Some of the people in the 3Y+ pot should really be in a much earlier pot, but
+they released "malformed" things, and I’m not gonna worry about them. Some
+people got a PAUSE account for reasons other than releasing, but eventually got
+around to releasing.
+
+---
+
+![](img/time-to-first-release-in-weeks.png)
+
+Note:
+The first two slices of the pie are "week 0", then week 1, 2, and 3 are making
+up "1 Month" in the pie chart. The histogram has a very long tail, which gets
+rolled up in the pie chart. I’m just showing the first half year here, so show
+how quickly it drops off.
+
+When people sign up for PAUSE they get an email with a bunch of useful
+information. I’ve thought we should give more concrete stuff in that email, but
+a lot of people are unlikely to have that email still lying around when they
+finally get around to their first release.
+
+---
+
+## Lifetime releases per author
+
+![](img/author-lifetime-releases.png)
+
+Note:
+So a quarter of people only ever do 3 releases; half do 7 or fewer releases
+
+---
+
+## CPAN Day: Aug 16th
+
+The anniversary of the first ever CPAN upload: Aug 16, 1995
+
+Note:
+If you haven't released anything to CPAN this year, how about fixing a bug?
+---
+
+## So much friction 🪚
 
 * Researching how to create a new CPAN distribution can leave you paralyzed by choice
 
@@ -139,14 +251,16 @@ Note:
 
 ---
 
-# So much choice
+## So much choice 🛠️ 
 
-Installing from CPAN? Just use:
+Creating a new CPAN distribution? Just use:
 
-* cpan
-* cpanplus
-* cpanminus
-* cpm
+* Dist::Milla
+* Dist::Zilla
+* Minilla
+* Module::Build
+* Module::Build::Tiny
+* ExtUtils::MakeMaker
 
 Note:
 We already have excellent, powerful authoring tools. Can we create a wrapper
@@ -155,9 +269,20 @@ upload a distribution to CPAN?
 
 ---
 
-# PAUSE vs CPAN vs MetaCPAN 
+## So much choice ⛏️
 
-Are these distiinctions important to a casual user? 
+Installing from CPAN? Just use:
+
+* cpan
+* cpanplus
+* cpanminus
+* cpm
+
+---
+
+## PAUSE vs CPAN vs MetaCPAN 🐾
+
+Are these distinctions important to a casual user? 
 
 Note:
 A lot of people don't know the practical differences between these moving parts.
@@ -166,15 +291,20 @@ casual users don't need to care
 
 ---
 
-## Traditional Book Publishers
-
-* Perl books still do occasionally get published
-  * "Advanced Perl Programming: From Advanced to Expert", Apress, May 2020
-  * Learning Perl, 8th edition, O'Reilly, August 2021
+## What About Books? 📖
 
 ---
 
-## Self Publishers
+### Traditional Book Publishers
+
+* "Advanced Perl Programming: From Advanced to Expert", Apress, May 2020
+* Learning Perl, 8th edition, O'Reilly, August 2021
+
+Note:
+* Perl books still do occasionally get published
+---
+
+### Self Publishers
 
 * "Mojolicious Web Clients", brian d foy, updated June 2023
 * "GitHub Actions Essentials", Dave Cross, updated April 2023
@@ -184,7 +314,11 @@ I don't think I've seen a Perl book in a local bookstore in many years.
 
 ---
 
-# Conferences: North America
+## What About Conferences? 🎤 
+
+---
+
+## Conferences: North America
 
 * You're at one right now ❤️
 * There will be another next year ❤️
@@ -195,7 +329,7 @@ Note:
 
 ---
 
-# Conferences: Asia and Japan
+## Conferences: Asia and Japan
 
 * The last YAPC::Asia was apparently held in 2015, BUT...
   * There was YAPC::Japan::Online in 2022 ❤️
@@ -205,25 +339,27 @@ https://www.youtube.com/@jpa_perl
 
 ---
 
-# Conferences: European Union
+## Conferences: European Union
 
 * YAPC::EU appears to be dormant
 * The Perl and Koha conference will be in Finland in August 2023 ❤️
 
 ---
 
-# PerlMongers / pm.org
+## PerlMongers / pm.org
 
+https://github.com/perlorg/www.pm.org/pull/182
+
+Note:
 * Local PM groups appear to be disappearing, but pm.org can be deceptive
 * The calendar of upcoming events is empty
 * Every monger group in Canada links to a site which is either oudated or missing
   * This includes Toronto.pm. I guess our hosting disappeared and we didn't notice.
-    * https://github.com/perlorg/www.pm.org/pull/182
   * I suspect some PM group sites have been replaced via meetup.com pages
 
 
 ---
-# Reddit: /r/perl
+## Reddit: /r/perl
 
 
 ![/r/perl](img/reddit.png)
@@ -233,7 +369,7 @@ Note:
 
 ---
 
-# perl.com
+## perl.com
 
 ![perl.com](img/perl-dot-com.png)
 
@@ -247,9 +383,9 @@ Note:
 
 ---
 
-## perl.com:
+### perl.com:
 
-## "What's New on CPAN" Articles
+### "What's New on CPAN" Articles
 
 ![perl.com](img/perl-dot-com-new-on-cpan.png)
 
@@ -262,7 +398,7 @@ adoption of new modules.
 
 ---
 
-# Can We Revive This?
+## Can We Revive This?
 
 🤑 🤑 🤑
 
@@ -275,7 +411,7 @@ Note:
 
 ---
 
-# Why Hire?
+## Why Hire?
 
 Note:
 * Buying a service allows you to make demands to follow a schedule
@@ -285,18 +421,19 @@ Note:
 
 ---
 
-# perl.com: A springboard for all things perl?
+## perl.com: A springboard for all things perl?
 
+Note:
 Organize the content in a way that a beginner could come to perl.com and find
 what they need to begin contributing.
 
 ---
 
-# learn.perl.org
+## learn.perl.org
 
 * https://learn.perl.org/books/
   * No books after October 2016
-  * Learning Perl, 8th edition was published in August 2021
+  * Learning Perl, 8th edition was published in August 2021 🤔
 
 Note:
 * This could be a good starting point for people new to Perl
@@ -305,31 +442,31 @@ Note:
 
 ---
 
-# perladvent.org
+## perladvent.org 🎅
 
 * First publication in Dec 2000
 
 ---
 
-# perladvent.org
+## perladvent.org 🤶
 
 * Has published every year since 2000
 
 ---
 
-# perladvent.org
+## perladvent.org 🧝
 
 * 2021 hit a bump in the road, with no articles beyond Dec 1
 
 ---
 
-# perladvent.org
+## perladvent.org 🎁
 
 * In 2022 the calendar roared back to life with 27 articles
 
 ---
 
-# CFP
+## CFP 📣
 
 * The 2023 Perl Advent Call for Papers is now open
   * https://cfp.perladvent.org/
@@ -339,20 +476,19 @@ Note:
 
 ---
 
-# Low Bus Numbers
+## Low Bus Numbers 🚍
 
 Note:
 Some key parts of the Perl ecosystem are effectively being run by one or two people. What happens if the are no longer able to contribute?
 
 ---
 
-* https://xkcd.com/2347/
-
-![](img/dependency_2x.png)
+![](img/dependency.png)
+#### https://xkcd.com/2347/
 
 ---
 
-# CPAN Testers
+## CPAN Testers
 
 Note:
 * Doug Bell took this project over from Barbie.
@@ -360,7 +496,7 @@ Note:
 
 ---
 
-# Devel::Cover / cpancover.com
+## Devel::Cover / cpancover.com
 
 Note:
 * Paul Johnson
@@ -368,7 +504,7 @@ Note:
 
 ---
 
-# PPI
+## PPI
 
 Note:
 * Christian Walde (mithaldu)
@@ -376,7 +512,7 @@ Note:
 
 ---
 
-# Futureproofing
+## Futureproofing
 
 * Move important things to public repositories
 * Publish to GitHub pages or some other public static site host
@@ -387,14 +523,14 @@ site generator is much less complicated and much more portable.
 
 ---
 
-# Beyond buses
+## Beyond buses
 
 Note:
 What has been going on with security?
 
 ---
 
-# CPAN Security Advisory Database
+## CPAN Security Advisory Database
 
 https://github.com/briandfoy/cpan-security-advisory
 
@@ -404,14 +540,14 @@ Note:
 
 ---
 
-# CPAN Security Working Group
+## CPAN Security Working Group
 
 * Established at the Perl Toolchain Summit in April 2023
 * https://security.metacpan.org/
 
 ---
 
-# Recent Releases
+## Recent Releases
 
 * Mozilla::CA
 * LWP::Protocol::https
@@ -422,7 +558,7 @@ Note:
 
 ---
 
-# prepan.org
+## prepan.org
 
 Note:
 * A place to discuss CPAN modules before your first upload
@@ -433,7 +569,7 @@ Note:
 
 ---
 
-# Protecting Your Domain Names
+## Protecting Your Domain Names
 
 * Transfer ownership of your Perl-related domain to TPRC
 * Domains will auto-renew at no cost to you
@@ -441,7 +577,7 @@ Note:
 
 ---
 
-# How to Transfer Your Domain Name
+## How to Transfer Your Domain Name
 
 * Ask on TPRF Slack
   * https://join.slack.com/t/perlfoundation/shared_invite/zt-1yn4upl3r-mS6S2NljtC5dyqMgQCHZ1g
@@ -449,11 +585,11 @@ Note:
 
 ---
 
-# Audience Participation
+## Audience Participation
 
 ---
 
-# The Official Perl Logo Quiz
+## The Official Perl Logo Quiz
 
 ---
 
@@ -472,14 +608,14 @@ Note:
 
 ---
 
-# Which is it?
+## Which is it?
 
 * None of the above?
 * All of the above?
 
 ---
 
-# Do we already have a winner?
+## Do we already have a winner?
 
 Note:
 * The shadowed camel is already used in many places
@@ -489,7 +625,7 @@ Note:
 
 ---
 
-# But we can't use it for books
+## But we can't use it for books
 
 ![/r/perl](img/leo-shrug.gif)
 
@@ -502,11 +638,11 @@ Note:
 
 ---
 
-# How do we get new Perl developers
+## How do we get new Perl developers
 
 ---
 
-# It's already happening and it has been for years
+## It's already happening and it has been for years
 
 ---
 
@@ -520,7 +656,7 @@ Note:
 
 ---
 
-# Are we giving new (and current) Perl developers great development tools?
+## Are we giving new (and current) Perl developers great development tools?
 
 * Focus on the editor experience
 * Make the setup and execution of editing Perl on VSCode simple and easy
@@ -534,9 +670,9 @@ Note:
 
 ---
 
-# Formatting
+## Formatting
 
-## `Perl::Tidy`
+### `Perl::Tidy`
 
 Note:
 * We've got formatting solved. `Perl::Tidy` is an incredible tool and the developer is very responsive
@@ -544,17 +680,19 @@ Note:
 
 ---
 
-# Linting
+## Linting
 
-* `Perl::Critic` as linting down to a science, but there are a lot of rules.
-* `Perl Navigator` has a default critic profile: https://github.com/bscan/PerlNavigator/blob/main/server/src/perl/defaultCriticProfile
+* `Perl::Critic` as linting down to a science, 
+  * but there are a lot of rules.
+* `Perl Navigator` has a default critic profile: 
+  * https://github.com/bscan/PerlNavigator/blob/main/server/src/perl/defaultCriticProfile
 
 Note:
 * This might be a good place to standardize on enforcing simple, understandable best practices for beginners
 
 ---
 
-# Fixing
+## Fixing
 
 * See https://metacpan.org/dist/App-PerlNitpick
 * Use https://metacpan.org/dist/App-perlimports where possible
@@ -566,7 +704,7 @@ Note:
 
 ---
 
-# precious
+## precious
 
 There is one excellent tool to harness all of your linters and tidiers.
 
@@ -574,14 +712,14 @@ There is one excellent tool to harness all of your linters and tidiers.
 
 ---
 
-# Happy Developers = Happy Managers
+## Happy Developers = Happy Managers
 
 * Making Perl a pleasant and easier language to work with can drive developer adoption (or retention)
 * The more that Perl remains as a production languge, the better our chance of corporate donations
 
 ---
 
-# Can We Do More with Less?
+## Can We Do More with Less?
 
 Note:
 * We're like a business which is losing revenue. We need to find inefficiencies and redundancies to make the most out of our resources.
@@ -591,39 +729,20 @@ Note:
 * How many different JSON or YAML parsers does CPAN really need?
 
 
-# Donations Matter -- a lot
-
-* Without donations, a lot of things we care about are in danger
-  * grants
-  * conferences (YAPF, Perl Toolchain Summit, etc)
-  * infrastructure for hosting etc.
-    * some of these things (but not all) exist as in-kind donations
-    * donated equipment and services can disappear
-      * new management
-      * new ownership
-      * shifting priorities
-    * sometimes donated services disappear with very little notice
-
 ---
 
-# Helpful (Continuous Integration)
-
-If you need Docker images with a pre-installed Perl and pre-installed test and development modules, have a look at https://github.com/Perl/docker-perl-tester
-
----
-
-# Is Anyone in Charge?
+## Is Anyone in Charge?
 
 We are a rudderless ship
 
-Note
+Note:
 * There is no dictator, benevolant or otherwise
 * We're kind of bumbling along, sometimes in the same direction
 * Who are some of the stakeholders?
 
 ---
 
-# Stakeholders
+## Stakeholders
 
   * TPRF
     * Fundraising
@@ -633,7 +752,7 @@ Note
 
 ---
 
-# Stakeholders
+## Stakeholders
   * PSC & P5P
     * Decisions about Perl the language
 
@@ -643,7 +762,7 @@ be very functional. The journey to get to that place was very unfortunate.
 
 ---
 
-# An Aside
+## An Aside
 
 Note:
 Sawyer will be able to address all of this more eloquently than I can, but in
@@ -655,14 +774,14 @@ people can have knock-on effects which last for years.
 
 ---
 
-# Stakeholders
+## Stakeholders
 
   * The Perl Toolchain
     * Decisions about PAUSE, CPAN, testing and quality assurance modules
 
 ---
 
-# Stakeholders
+## Stakeholders
 
   * MetaCPAN
     * Part of the toolchain, but exists as a distinct organization
@@ -673,7 +792,7 @@ Note:
 
 ---
 
-# Project Stakeholders
+## Project Stakeholders
 
 There are some very active projects whose voices should probably be heard when important decisions are made
 
@@ -686,7 +805,7 @@ There are some very active projects whose voices should probably be heard when i
 
 ---
 
-# A meeting of the stakeholders?
+## A meeting of the stakeholders?
 
 Note:
 * Perhaps representatives from some or all of these groups could meet quarterly for 90 minutes to discuss how they can help each other move forward?
@@ -695,7 +814,7 @@ Note:
 
 ---
 
-# TPRC Community Representatives
+## TPRC Community Representatives
 
 On a related note, TPRC does have an open door for people around the Perl world to make themselves heard.
 
@@ -705,7 +824,7 @@ On a related note, TPRC does have an open door for people around the Perl world 
 
 ---
 
-# Things That Are Helpful to Know
+## Things That Are Helpful to Know
 
 * https://perl.theplanetarium.org/
   * Has an RSS feed
@@ -714,7 +833,7 @@ On a related note, TPRC does have an open door for people around the Perl world 
 
 ---
 
-# Helpful (continued)
+## Helpful (continued)
 
 CPAN authors, add yourself to the CPAN dashboard
 * https://cpandashboard.com/
@@ -722,13 +841,15 @@ CPAN authors, add yourself to the CPAN dashboard
 
 ---
 
-# In Summary
+## Helpful (Continuous Integration)
+
+If you need Docker images with a pre-installed Perl and pre-installed test and development modules, have a look at https://github.com/Perl/docker-perl-tester
+
+---
+
+## In Summary
 
 * Shadowed camel
+* Revive perl.com
 * Focus on building an amazing Perl IDE experience
-* Consolidate web resources so we're doing less work
-* Trade in your bespoke app for a static website builder
 * Make it easier for new CPAN authors to thrive
-* Build a tool which gives you everything you need for free
-  * See Rust ecosystem
-  * See npm
