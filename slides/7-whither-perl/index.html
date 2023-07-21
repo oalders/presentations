@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="/slides/whither-perl/dist/reset.css">
+		<link rel="stylesheet" href="/slides/whither-perl/dist/reveal.css">
+		<link rel="stylesheet" href="/slides/whither-perl/dist/theme/moon.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="/slides/whither-perl/plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown="/slides/whither-perl/marp.md">
+				</section>
+			</div>
+		</div>
+
+		<script src="/slides/whither-perl/dist/reveal.js"></script>
+		<script src="/slides/whither-perl/plugin/notes/notes.js"></script>
+		<script src="/slides/whither-perl/plugin/markdown/markdown.js"></script>
+		<script src="/slides/whither-perl/plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
